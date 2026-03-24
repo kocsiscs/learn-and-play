@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>✨ Helyesírás Varázs</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0e1a;
+  --bg2: #1a1830;
+  --card: #231f3a;
+  --card2: #2d2848;
+  --border: #3d3660;
+  --jly: #fbbf24;
+  --szo: #4ade80;
+  --text: #f0eeff;
+  --muted: #9b8fc4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.screen { display: none; }
+.screen.active { display: flex; }
+
+/* ===== WELCOME ===== */
+#screen-welcome {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  gap: 24px;
+}
+.logo {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(2.4rem, 8vw, 4rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, #fbbf24, #e879f9, #4ade80);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  filter: drop-shadow(0 0 28px #e879f955);
+}
+.logo-sub { font-size: 1.1rem; color: var(--muted); font-weight: 700; text-align: center; margin-top: -10px; }
+
+.player-box { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; }
+
+.player-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 16px; padding: 12px 14px;
+  cursor: pointer; transition: all 0.18s; position: relative;
+  user-select: none;
+}
+.player-card:hover { border-color: #e879f966; transform: translateY(-1px); }
+.player-card.selected {
+  border-color: #e879f9; background: #e879f911;
+  box-shadow: 0 4px 20px #e879f944;
+}
+.player-card.selected::after {
+  content: '✓'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 1.2rem; color: #e879f9; font-weight: 900;
+}
+.pc-avatar { font-size: 1.8rem; cursor: pointer; transition: transform 0.15s; flex-shrink: 0; }
+.pc-avatar:hover { transform: scale(1.3); }
+.pc-name-wrap { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.pc-name-input {
+  background: transparent; border: none; outline: none;
+  font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text);
+  width: 100%; cursor: text;
+}
+.pc-name-input::placeholder { color: var(--muted); }
+.pc-hint { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+.pc-del {
+  background: none; border: none; color: var(--muted); font-size: 1rem;
+  cursor: pointer; padding: 6px; transition: color 0.2s; flex-shrink: 0; z-index: 1;
+}
+.pc-del:hover { color: #f87171; }
+
+.btn-add-p {
+  background: transparent; border: 1.5px dashed var(--border);
+  border-radius: 14px; padding: 10px; color: var(--muted);
+  font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.btn-add-p:hover { border-color: #e879f9; color: #e879f9; }
+
+/* Mode select on welcome */
+.mode-select-box { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; }
+.mode-select-lbl { font-size: 0.82rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+.mode-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mode-pick-card {
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 16px; padding: 16px 12px;
+  cursor: pointer; transition: all 0.18s; text-align: center;
+  user-select: none;
+}
+.mode-pick-card:hover { transform: translateY(-2px); }
+.mode-pick-card.sel-jly { border-color: var(--jly); background: #fbbf2411; box-shadow: 0 4px 20px #fbbf2433; }
+.mode-pick-card.sel-szo { border-color: var(--szo); background: #4ade8011; box-shadow: 0 4px 20px #4ade8033; }
+.mode-pick-icon { font-size: 2rem; margin-bottom: 6px; }
+.mode-pick-name { font-family: 'Baloo 2', cursive; font-size: 1rem; font-weight: 800; }
+.mode-pick-desc { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+
+.btn-big {
+  font-family: 'Baloo 2', cursive; font-size: 1.5rem; font-weight: 700;
+  background: linear-gradient(135deg, #e879f9, #60a5fa);
+  color: white; border: none; border-radius: 22px; padding: 16px 56px;
+  cursor: pointer; box-shadow: 0 8px 30px #e879f944;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-big:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 14px 40px #e879f966; }
+.btn-big:active { transform: scale(0.97); }
+
+/* ===== GAME ===== */
+#screen-game {
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 18px; background: var(--bg2);
+  border-bottom: 1.5px solid var(--border); gap: 10px; flex-wrap: wrap; flex-shrink: 0;
+}
+.btn-back {
+  background: var(--card); border: 1.5px solid var(--border); color: var(--muted);
+  border-radius: 10px; padding: 6px 14px; font-family: 'Nunito', sans-serif;
+  font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.btn-back:hover { border-color: #e879f9; color: var(--text); }
+.p-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 50px; padding: 5px 14px; font-weight: 800; font-size: 0.95rem;
+}
+.scores { display: flex; gap: 8px; }
+.score-chip {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 50px; padding: 5px 14px; font-size: 0.88rem; font-weight: 800;
+  display: flex; align-items: center; gap: 5px;
+}
+
+/* Timer */
+.timer-bar {
+  padding: 8px 18px; background: var(--bg2);
+  border-bottom: 1.5px solid var(--border); flex-shrink: 0;
+}
+.timer-row { display: flex; align-items: center; gap: 10px; }
+.timer-track {
+  flex: 1; height: 13px; background: var(--card);
+  border-radius: 50px; overflow: hidden; border: 1px solid var(--border);
+}
+.timer-fill {
+  height: 100%; border-radius: 50px;
+  background: #4ade80; transition: width 0.25s linear, background 0.5s;
+  box-shadow: 0 0 8px #4ade8088;
+}
+.timer-num {
+  font-family: 'Baloo 2', cursive; font-size: 1.25rem; font-weight: 700;
+  min-width: 34px; text-align: center; color: #4ade80; transition: color 0.3s;
+}
+
+/* Q area */
+.q-area {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 20px 16px; gap: 16px;
+}
+
+.q-card {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 26px; padding: 32px 36px 28px; text-align: center;
+  width: 100%; max-width: 560px;
+  box-shadow: 0 12px 48px #00000055;
+  animation: pop 0.35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes pop {
+  from { opacity:0; transform: scale(0.88) translateY(18px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+
+.q-badge {
+  display: inline-block; font-size: 0.78rem; font-weight: 800;
+  border-radius: 50px; padding: 3px 13px; margin-bottom: 14px;
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.badge-jly { background: #fbbf2422; color: var(--jly); border: 1px solid #fbbf2444; }
+.badge-szo { background: #4ade8022; color: var(--szo); border: 1px solid #4ade8044; }
+
+/* === J/LY MODE === */
+.jly-word-display {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1.4rem, 5vw, 2.2rem);
+  font-weight: 800; color: var(--muted);
+  margin-bottom: 6px;
+}
+.jly-hint {
+  font-size: 0.85rem; color: var(--muted); margin-bottom: 20px;
+}
+.jly-choices {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  margin-bottom: 8px;
+}
+.jly-btn {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800;
+  background: var(--card2); border: 2.5px solid var(--border);
+  border-radius: 18px; padding: 18px 10px;
+  color: var(--text); cursor: pointer;
+  transition: all 0.14s;
+  position: relative;
+}
+.jly-btn:hover:not(:disabled) {
+  border-color: var(--jly); color: var(--jly);
+  background: #fbbf2411;
+  transform: translateY(-2px);
+}
+.jly-btn:disabled { cursor: default; }
+.jly-btn.correct {
+  border-color: #4ade80; background: #4ade8022; color: #4ade80;
+  animation: pop 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+.jly-btn.wrong {
+  border-color: #f87171; background: #f8717122; color: #f87171;
+  animation: shake 0.4s;
+}
+@keyframes shake {
+  0%,100% { transform:translateX(0); }
+  20%,60%  { transform:translateX(-8px); }
+  40%,80%  { transform:translateX(8px); }
+}
+
+.jly-progress-bar {
+  height: 5px; background: var(--card2); border-radius: 50px;
+  overflow: hidden; margin-top: 14px;
+}
+.jly-progress-fill {
+  height: 100%; border-radius: 50px; background: var(--jly);
+  transition: width 0.4s ease;
+}
+.jly-progress-label {
+  font-size: 0.72rem; color: var(--muted); margin-top: 4px; font-weight: 700;
+}
+
+/* === SZÓTAGOLÁS MODE === */
+.szo-word-display {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(2rem, 7vw, 3.2rem);
+  font-weight: 800; letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.szo-hint {
+  font-size: 0.88rem; color: var(--muted); margin-bottom: 22px; line-height: 1.5;
+}
+.szo-chars {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 0; margin-bottom: 20px; align-items: center;
+  user-select: none;
+}
+.szo-letter {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  font-weight: 800; color: var(--text);
+  padding: 4px 1px;
+  transition: color 0.15s;
+}
+.szo-gap {
+  width: 16px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+  flex-shrink: 0;
+}
+.szo-gap-line {
+  width: 3px; height: 28px; border-radius: 3px;
+  background: transparent;
+  transition: all 0.15s;
+}
+.szo-gap:hover .szo-gap-line {
+  background: #e879f988;
+  height: 42px;
+}
+.szo-gap.active .szo-gap-line {
+  background: var(--jly);
+  height: 46px;
+  box-shadow: 0 0 10px #fbbf2466;
+}
+.szo-result-row {
+  display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px;
+  min-height: 44px;
+}
+.szo-result {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 800; color: #4ade80;
+  letter-spacing: 1px;
+}
+.szo-result-placeholder {
+  font-family: 'Baloo 2', cursive;
+  font-size: 1.1rem; color: var(--muted); font-weight: 700;
+}
+
+.submit-btn {
+  font-family: 'Baloo 2', cursive; font-size: 1.25rem; font-weight: 700;
+  background: linear-gradient(135deg, #e879f9, #60a5fa);
+  color: white; border: none; border-radius: 14px; padding: 11px 28px;
+  cursor: pointer; box-shadow: 0 5px 18px #e879f944;
+  transition: transform 0.14s; outline: none;
+}
+.submit-btn:hover { transform: translateY(-2px); }
+.submit-btn:active { transform: scale(0.96); }
+
+.feedback {
+  min-height: 48px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; font-weight: 800; border-radius: 14px;
+  padding: 8px 18px; width: 100%; max-width: 560px; text-align: center;
+}
+.feedback.correct { background: #4ade8022; color: #4ade80; }
+.feedback.wrong   { background: #f8717122; color: #f87171; }
+
+/* Ready card */
+.ready-card {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 26px; padding: 40px 32px; text-align: center;
+  width: 100%; max-width: 520px; box-shadow: 0 12px 48px #00000055;
+}
+
+/* ===== ROUND COMPLETE ===== */
+#overlay {
+  display: none; position: fixed; inset: 0; background: #0f0e1aee;
+  z-index: 100; align-items: center; justify-content: center; padding: 16px;
+}
+#overlay.show { display: flex; }
+.rc-card {
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 28px; padding: 36px 32px 28px; max-width: 440px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  text-align: center; box-shadow: 0 20px 80px #00000088;
+  animation: pop 0.4s cubic-bezier(.34,1.56,.64,1);
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+.rc-trophy { font-size: 4.5rem; animation: float 1.3s ease-in-out infinite alternate; }
+@keyframes float { to { transform: translateY(-12px) scale(1.06); } }
+.rc-title {
+  font-family: 'Baloo 2', cursive; font-size: 2rem; font-weight: 800;
+  background: linear-gradient(135deg, #fbbf24, #e879f9);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.stats { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.stat {
+  background: var(--card2); border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 10px 16px; font-size: 0.95rem; font-weight: 800;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.stat .sv { font-family: 'Baloo 2', cursive; font-size: 1.7rem; line-height: 1; }
+.stat .sl { color: var(--muted); font-size: 0.75rem; }
+
+.mistakes-box {
+  background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 14px; width: 100%; max-width: 380px;
+  text-align: left;
+}
+.mistakes-hdr {
+  font-size: 0.82rem; font-weight: 800; color: #f87171;
+  margin-bottom: 10px; text-align: center;
+}
+.mistake-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem;
+}
+.mistake-row:last-child { border-bottom: none; }
+.mistake-q { color: var(--muted); font-weight: 700; flex: 1; }
+.mistake-arr { color: var(--muted); }
+.mistake-a { color: #4ade80; font-weight: 800; font-family: 'Baloo 2', cursive; }
+.perfect-box {
+  background: #4ade8022; border: 1.5px solid #4ade8044;
+  border-radius: 14px; padding: 14px; color: #4ade80;
+  font-weight: 800; font-size: 0.95rem; width: 100%;
+}
+
+.rc-btns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.btn-again {
+  font-family: 'Baloo 2', cursive; font-size: 1.15rem; font-weight: 700;
+  background: linear-gradient(135deg, #fbbf24, #fb923c);
+  color: #1a0f00; border: none; border-radius: 14px; padding: 12px 24px;
+  cursor: pointer; transition: transform 0.14s;
+}
+.btn-again:hover { transform: translateY(-2px); }
+.btn-menu {
+  font-family: 'Baloo 2', cursive; font-size: 1.15rem; font-weight: 700;
+  background: var(--card2); border: 1.5px solid var(--border);
+  color: var(--muted); border-radius: 14px; padding: 12px 24px;
+  cursor: pointer; transition: all 0.14s;
+}
+.btn-menu:hover { border-color: #e879f9; color: var(--text); }
+
+/* Confetti */
+#cf { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
+.cp {
+  position: absolute; top: -20px;
+  animation: fall linear forwards;
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* Ranglista */
+#screen-ranglista {
+  flex-direction: column; min-height: 100vh; align-items: center;
+}
+.ranglista-header {
+  width: 100%; background: var(--bg2); border-bottom: 1.5px solid var(--border);
+  padding: 14px 18px; display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+}
+.ranglista-title {
+  font-family: 'Baloo 2', cursive; font-size: 1.4rem; font-weight: 800;
+  background: linear-gradient(135deg, #fbbf24, #e879f9);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.ranglista-content {
+  width: 100%; max-width: 540px; padding: 16px; display: flex;
+  flex-direction: column; gap: 14px; overflow-y: auto;
+}
+</style>
+</head>
+<body>
+
+<div id="cf"></div>
+
+<!-- ===== WELCOME ===== -->
+<div class="screen active" id="screen-welcome">
+  <div style="font-size:3.5rem;margin-bottom:-8px">✨</div>
+  <div class="logo">Helyesírás Varázs</div>
+  <div class="logo-sub">Tanuljunk helyesen írni – játszva!</div>
+
+  <div class="player-box">
+    <div id="player-cards"></div>
+    <button class="btn-add-p" onclick="addPlayerInput()">➕ Új játékos hozzáadása</button>
+  </div>
+
+  <div class="mode-select-box">
+    <div class="mode-select-lbl">Válassz játékmódot</div>
+    <div class="mode-cards">
+      <div class="mode-pick-card" id="mode-card-jly" onclick="selectMode('jly')">
+        <div class="mode-pick-icon">🔤</div>
+        <div class="mode-pick-name" style="color:var(--jly)">J vagy LY?</div>
+        <div class="mode-pick-desc">Melyik betű kerül a szóba?</div>
+      </div>
+      <div class="mode-pick-card" id="mode-card-szo" onclick="selectMode('szo')">
+        <div class="mode-pick-icon">✂️</div>
+        <div class="mode-pick-name" style="color:var(--szo)">Szótagolás</div>
+        <div class="mode-pick-desc">Vágd fel a szót szótagokra!</div>
+      </div>
+    </div>
+    <div id="ranglista-btn-wrap" style="text-align:center">
+      <button style="background:none;border:1.5px solid var(--border);color:var(--muted);border-radius:12px;padding:7px 20px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;transition:all 0.2s" 
+        onmouseover="this.style.borderColor='#e879f9';this.style.color='var(--text)'" 
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'"
+        onclick="showRanglista()">🏆 Ranglista</button>
+    </div>
+  </div>
+
+  <button class="btn-big" id="btn-start" onclick="startGame()">🚀 Játékos játszik!</button>
+</div>
+
+<!-- ===== GAME ===== -->
+<div class="screen" id="screen-game">
+  <div class="topbar">
+    <button class="btn-back" onclick="goWelcome()">← Vissza</button>
+    <div class="p-badge" id="p-badge">🦁 <span id="p-name-top">Játékos</span></div>
+    <div class="scores">
+      <div class="score-chip">✅ <span id="sc-ok">0</span></div>
+      <div class="score-chip">📝 <span id="sc-all">0</span></div>
+    </div>
+  </div>
+
+  <div class="timer-bar">
+    <div class="timer-row">
+      <span style="font-size:0.9rem">⏱</span>
+      <div class="timer-track">
+        <div class="timer-fill" id="timer-fill" style="width:100%"></div>
+      </div>
+      <div class="timer-num" id="timer-num">60</div>
+    </div>
+  </div>
+
+  <div class="q-area">
+    <!-- Ready card -->
+    <div class="ready-card" id="ready-card">
+      <div id="ready-icon" style="font-size:4rem;margin-bottom:12px">🎯</div>
+      <div id="ready-title" style="font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;margin-bottom:8px">Készen állsz?</div>
+      <div id="ready-desc" style="color:var(--muted);font-size:0.95rem;font-weight:600;line-height:1.6;margin-bottom:20px"></div>
+      <button class="btn-big" style="font-size:1.2rem;padding:13px 40px" onclick="beginRound()">▶ Start!</button>
+    </div>
+
+    <!-- Game card (hidden until start) -->
+    <div class="q-card" id="qcard" style="display:none">
+      <div class="q-badge" id="qbadge">J vagy LY?</div>
+      <div id="game-content"></div>
+    </div>
+
+    <div class="feedback" id="fb"></div>
+  </div>
+</div>
+
+<!-- ===== RANGLISTA ===== -->
+<div class="screen" id="screen-ranglista">
+  <div class="ranglista-header">
+    <button class="btn-back" onclick="showScr('screen-welcome')">← Vissza</button>
+    <div class="ranglista-title">🏆 Ranglista</div>
+  </div>
+  <div class="ranglista-content" id="ranglista-content"></div>
+</div>
+
+<!-- Overlay -->
+<div id="overlay">
+  <div class="rc-card">
+    <div class="rc-trophy" id="rc-t">🏆</div>
+    <div class="rc-title" id="rc-title">Fantasztikus!</div>
+    <div class="stats" id="rc-stats"></div>
+    <div id="rc-mistakes" style="display:none;width:100%;max-width:400px"></div>
+    <div class="rc-btns">
+      <button class="btn-again" onclick="playAgain()">🔄 Újra!</button>
+      <button class="btn-menu" onclick="goWelcome()">🏠 Játékosváltás</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const AVATARS = ['🦁','🐯','🦊','🐼','🐸','🐧','🦄','🐉','🐬','🐺','🦋','🦅'];
+const ROUND_TIME = 60;
+
+// ===== J/LY SZÓKINCS =====
+// format: { word: 'helyes szó', wrong: 'helytelen szó', hint: 'értelmező' }
+const JLY_WORDS = [
+  // LY szavak
+  { correct:'gólya',    wrong:'gója',    emoji:'🦢', hint:'madár'},
+  { correct:'folyó',    wrong:'fojó',    emoji:'🌊', hint:'víz'},
+  { correct:'lány',     wrong:'lány',    emoji:'👧', hint:'— lány (ly betűvel!)'},
+  { correct:'lyuk',     wrong:'juk',     emoji:'🕳️', hint:'nyílás'},
+  { correct:'mély',     wrong:'méj',     emoji:'🌊', hint:'nem sekély'},
+  { correct:'hely',     wrong:'hej',     emoji:'📍', hint:'ahol valami van'},
+  { correct:'milyen',   wrong:'miijen',  emoji:'🤔', hint:'kérdés'},
+  { correct:'ilyen',    wrong:'iijen',   emoji:'👆', hint:'rámutatás'},
+  { correct:'olyan',    wrong:'oijan',   emoji:'👆', hint:'rámutatás'},
+  { correct:'fogoly',   wrong:'fogoj',   emoji:'🐦', hint:'madár vagy rab'},
+  { correct:'pulyka',   wrong:'pujka',   emoji:'🦃', hint:'madár'},
+  { correct:'király',   wrong:'kirájj',  emoji:'👑', hint:'uralkodó'},
+  { correct:'talál',    wrong:'talájj',  emoji:'🔍', hint:'megtalál'},
+  { correct:'találja',  wrong:'tálája',  emoji:'🔍', hint:'megtalálja'},
+  { correct:'halál',    wrong:'haláj',   emoji:'💀', hint:'az élet vége'},
+  { correct:'helyes',   wrong:'hejes',   emoji:'✅', hint:'nem hibás'},
+  { correct:'helyett',  wrong:'hejett',  emoji:'🔄', hint:'valami helyett'},
+  { correct:'élyen',    wrong:'éjen',    emoji:'🔪', hint:'éles helyen'},
+  { correct:'mályva',   wrong:'mája',    emoji:'🌸', hint:'virág'},
+  { correct:'polyák',   wrong:'pojákok', emoji:'🌍', hint:'lengyel ember (régi)'},
+  { correct:'gulya',    wrong:'guja',    emoji:'🐄', hint:'marhacsorda'},
+  { correct:'moly',     wrong:'moj',     emoji:'🦋', hint:'ruharongáló rovar'},
+  { correct:'súlyos',   wrong:'sújos',   emoji:'⚖️', hint:'nehéz'},
+  { correct:'súly',     wrong:'súj',     emoji:'⚖️', hint:'nehézség'},
+  { correct:'golyó',    wrong:'gojó',    emoji:'⚽', hint:'gömb alakú tárgy'},
+  { correct:'folyamat', wrong:'fojamat', emoji:'⚙️', hint:'folyó esemény'},
+  { correct:'lyukas',   wrong:'jukas',   emoji:'🕳️', hint:'van benne lyuk'},
+  { correct:'tályog',   wrong:'táljog',  emoji:'🤒', hint:'gennyes duzzanat'},
+  { correct:'kölyök',   wrong:'köljök',  emoji:'🐶', hint:'kiskutya vagy gyerek'},
+  { correct:'polyp',    wrong:'pojp',    emoji:'🐙', hint:'tengeri állat'},
+
+  // J szavak
+  { correct:'jár',      wrong:'lyár',    emoji:'🚶', hint:'mozog'},
+  { correct:'játék',    wrong:'lyáték',  emoji:'🎮', hint:'szórakozás'},
+  { correct:'jó',       wrong:'lyó',     emoji:'👍', hint:'pozitív'},
+  { correct:'jobb',     wrong:'lyobb',   emoji:'✅', hint:'jobb oldal vagy jobb minőség'},
+  { correct:'jön',      wrong:'lyön',    emoji:'🚶', hint:'érkezik'},
+  { correct:'jár',      wrong:'lyár',    emoji:'🚶', hint:'mozog'},
+  { correct:'júlia',    wrong:'lyúlia',  emoji:'👩', hint:'női név'},
+  { correct:'január',   wrong:'lyanuár', emoji:'📅', hint:'első hónap'},
+  { correct:'június',   wrong:'lyúnius', emoji:'📅', hint:'hatodik hónap'},
+  { correct:'pajta',    wrong:'palta',   emoji:'🏚️', hint:'csűr'},
+  { correct:'bajnok',   wrong:'balynok', emoji:'🥇', hint:'győztes'},
+  { correct:'bojt',     wrong:'bolyt',   emoji:'🎀', hint:'díszes fonat'},
+  { correct:'dajka',    wrong:'dalka',   emoji:'👩‍🍼', hint:'bölcsőde'},
+  { correct:'fajta',    wrong:'falytta', emoji:'🌱', hint:'változat'},
+  { correct:'fejér',    wrong:'felyér',  emoji:'⬜', hint:'fehér (régies)'},
+  { correct:'hajó',     wrong:'halyó',   emoji:'⛵', hint:'vízi jármű'},
+  { correct:'héja',     wrong:'héla',    emoji:'🦅', hint:'ragadozó madár'},
+  { correct:'jár',      wrong:'lyár',    emoji:'🏃', hint:'mozog'},
+  { correct:'jel',      wrong:'lyel',    emoji:'🔣', hint:'szimbólum'},
+  { correct:'jer',      wrong:'lyer',    emoji:'👋', hint:'gyere! (régies)'},
+  { correct:'lejt',     wrong:'lejt',    emoji:'⛷️', hint:'— lejt (j betűvel)'},
+  { correct:'majom',    wrong:'malyom',  emoji:'🐒', hint:'állat'},
+  { correct:'mejj',     wrong:'melyly',  emoji:'💪', hint:'mellkas (népi)'},
+  { correct:'pajkos',   wrong:'palykos', emoji:'😜', hint:'csintalan'},
+  { correct:'rajzol',   wrong:'ralyzol', emoji:'✏️', hint:'képet csinál'},
+  { correct:'sejt',     wrong:'selytt',  emoji:'🔬', hint:'biológiai egység'},
+  { correct:'tejföl',   wrong:'telyföl', emoji:'🥛', hint:'tejtermék'},
+  { correct:'ujj',      wrong:'ulyly',   emoji:'☝️', hint:'kézen van'},
+  { correct:'vaj',      wrong:'valy',    emoji:'🧈', hint:'tejtermék'},
+  { correct:'vajda',    wrong:'valyda',  emoji:'👑', hint:'vezető'},
+  { correct:'varjú',    wrong:'valyú',   emoji:'🐦', hint:'fekete madár'},
+  { correct:'baj',      wrong:'baly',    emoji:'😟', hint:'probléma'},
+  { correct:'fej',      wrong:'fely',    emoji:'🗣️', hint:'testünk felső része'},
+  { correct:'haj',      wrong:'haly',    emoji:'💇', hint:'a fejünkön nő'},
+  { correct:'ij',       wrong:'ily',     emoji:'🏹', hint:'nyíl kilövésére'},
+  { correct:'íj',       wrong:'íly',     emoji:'🏹', hint:'nyíl kilövésére'},
+  { correct:'íjász',    wrong:'ílyász',  emoji:'🏹', hint:'aki íjjal lő'},
+  { correct:'ijesztő',  wrong:'ilyesztő',emoji:'👻', hint:'félelmetes'},
+  { correct:'kajak',    wrong:'kalyak',  emoji:'🛶', hint:'sport csónak'},
+  { correct:'kojot',    wrong:'kolyt',   emoji:'🐺', hint:'vadállat'},
+  { correct:'lajhár',   wrong:'lalyár',  emoji:'🦥', hint:'lassú állat'},
+  { correct:'pajzs',    wrong:'palyzs',  emoji:'🛡️', hint:'véd tőle'},
+  { correct:'pajtás',   wrong:'palytás', emoji:'👫', hint:'barát'},
+  { correct:'pejló',    wrong:'pelyló',  emoji:'🐴', hint:'barna ló'},
+  { correct:'rejt',     wrong:'relyt',   emoji:'🙈', hint:'elrejt'},
+  { correct:'sajt',     wrong:'salyt',   emoji:'🧀', hint:'tejtermék'},
+  { correct:'sejtelmes',wrong:'selytelmes',emoji:'🌙', hint:'titokzatos'},
+  { correct:'tejút',    wrong:'telyút',  emoji:'🌌', hint:'csillagrendszer'},
+  { correct:'ujjong',   wrong:'ulyyong', emoji:'🎉', hint:'örül'},
+];
+
+// ===== SZÓTAGOLÁS SZÓKINCS =====
+// Szótagok: a helyes elválasztás a magyar helyesírás szerint
+// Szabály: szótaghatár a magánhangzók közötti mássalhangzóknál,
+// kettős mássalhangzók (sz, cs, zs, gy, ny, ty, ly) egyben maradnak
+// (amelyek a szótag elejére kerülnek)
+const SZOTAG_WORDS = [
+  { word: 'alma',      syllables: ['al','ma'],           emoji: '🍎' },
+  { word: 'ablak',     syllables: ['ab','lak'],           emoji: '🪟' },
+  { word: 'asztal',    syllables: ['asz','tal'],          emoji: '🪑' },
+  { word: 'autó',      syllables: ['au','tó'],            emoji: '🚗' },
+  { word: 'baba',      syllables: ['ba','ba'],            emoji: '👶' },
+  { word: 'barát',     syllables: ['ba','rát'],           emoji: '👫' },
+  { word: 'betű',      syllables: ['be','tű'],            emoji: '🔤' },
+  { word: 'cipő',      syllables: ['ci','pő'],            emoji: '👟' },
+  { word: 'csacsi',    syllables: ['csa','csi'],          emoji: '🫏' },
+  { word: 'csillag',   syllables: ['csil','lag'],         emoji: '⭐' },
+  { word: 'csirke',    syllables: ['csir','ke'],          emoji: '🐔' },
+  { word: 'dinnye',    syllables: ['din','nye'],          emoji: '🍉' },
+  { word: 'eper',      syllables: ['e','per'],            emoji: '🍓' },
+  { word: 'erdő',      syllables: ['er','dő'],            emoji: '🌳' },
+  { word: 'fagylalt',  syllables: ['fagy','lalt'],        emoji: '🍦' },
+  { word: 'fokhagyma', syllables: ['fok','hagy','ma'],    emoji: '🧄' },
+  { word: 'füzet',     syllables: ['fü','zet'],           emoji: '📓' },
+  { word: 'gyerek',    syllables: ['gye','rek'],          emoji: '👦' },
+  { word: 'gyümölcs',  syllables: ['gyü','mölcs'],        emoji: '🍇' },
+  { word: 'hajó',      syllables: ['ha','jó'],            emoji: '⛵' },
+  { word: 'ház',       syllables: ['ház'],                emoji: '🏠' },
+  { word: 'iskola',    syllables: ['is','ko','la'],       emoji: '🏫' },
+  { word: 'játék',     syllables: ['já','ték'],           emoji: '🎮' },
+  { word: 'kacsa',     syllables: ['ka','csa'],           emoji: '🦆' },
+  { word: 'kalapács',  syllables: ['ka','la','pács'],     emoji: '🔨' },
+  { word: 'kenyér',    syllables: ['ke','nyér'],          emoji: '🍞' },
+  { word: 'könyv',     syllables: ['könyv'],              emoji: '📚' },
+  { word: 'kutya',     syllables: ['ku','tya'],           emoji: '🐶' },
+  { word: 'labda',     syllables: ['lab','da'],           emoji: '⚽' },
+  { word: 'lámpa',     syllables: ['lám','pa'],           emoji: '💡' },
+  { word: 'macska',    syllables: ['macs','ka'],          emoji: '🐱' },
+  { word: 'madár',     syllables: ['ma','dár'],           emoji: '🐦' },
+  { word: 'malom',     syllables: ['ma','lom'],           emoji: '⚙️' },
+  { word: 'méz',       syllables: ['méz'],                emoji: '🍯' },
+  { word: 'nadrág',    syllables: ['nad','rág'],          emoji: '👖' },
+  { word: 'nyúl',      syllables: ['nyúl'],               emoji: '🐰' },
+  { word: 'olaj',      syllables: ['o','laj'],            emoji: '🫙' },
+  { word: 'olló',      syllables: ['ol','ló'],            emoji: '✂️' },
+  { word: 'óvoda',     syllables: ['ó','vo','da'],        emoji: '🏫' },
+  { word: 'papír',     syllables: ['pa','pír'],           emoji: '📄' },
+  { word: 'pillangó',  syllables: ['pil','lan','gó'],     emoji: '🦋' },
+  { word: 'pohár',     syllables: ['po','hár'],           emoji: '🥤' },
+  { word: 'puha',      syllables: ['pu','ha'],            emoji: '🧸' },
+  { word: 'radír',     syllables: ['ra','dír'],           emoji: '📏' },
+  { word: 'repülő',    syllables: ['re','pü','lő'],       emoji: '✈️' },
+  { word: 'reggel',    syllables: ['reg','gel'],          emoji: '🌅' },
+  { word: 'szék',      syllables: ['szék'],               emoji: '🪑' },
+  { word: 'szemüveg',  syllables: ['sze','mü','veg'],     emoji: '👓' },
+  { word: 'szőlő',     syllables: ['sző','lő'],           emoji: '🍇' },
+  { word: 'tábla',     syllables: ['táb','la'],           emoji: '📋' },
+  { word: 'tanár',     syllables: ['ta','nár'],           emoji: '👨‍🏫' },
+  { word: 'tavasz',    syllables: ['ta','vasz'],          emoji: '🌸' },
+  { word: 'tehén',     syllables: ['te','hén'],           emoji: '🐄' },
+  { word: 'tenger',    syllables: ['ten','ger'],          emoji: '🌊' },
+  { word: 'tigris',    syllables: ['tíg','ris'],          emoji: '🐯' },
+  { word: 'torta',     syllables: ['tor','ta'],           emoji: '🎂' },
+  { word: 'traktor',   syllables: ['trak','tor'],         emoji: '🚜' },
+  { word: 'tyúk',      syllables: ['tyúk'],               emoji: '🐔' },
+  { word: 'ujj',       syllables: ['ujj'],                emoji: '☝️' },
+  { word: 'út',        syllables: ['út'],                 emoji: '🛣️' },
+  { word: 'üveg',      syllables: ['ü','veg'],            emoji: '🍶' },
+  { word: 'varjú',     syllables: ['var','jú'],           emoji: '🐦' },
+  { word: 'virág',     syllables: ['vi','rág'],           emoji: '🌸' },
+  { word: 'vonat',     syllables: ['vo','nat'],           emoji: '🚂' },
+  { word: 'zöldség',   syllables: ['zöld','ség'],         emoji: '🥦' },
+  { word: 'zsebkendő', syllables: ['zseb','ken','dő'],    emoji: '🤧' },
+  // Longer ones
+  { word: 'irodalom',  syllables: ['i','ro','da','lom'],  emoji: '📖' },
+  { word: 'asztalom',  syllables: ['asz','ta','lom'],     emoji: '🪑' },
+  { word: 'édesanya',  syllables: ['é','des','a','nya'],  emoji: '👩' },
+  { word: 'édesapa',   syllables: ['é','des','a','pa'],   emoji: '👨' },
+  { word: 'nagymama',  syllables: ['nagy','ma','ma'],     emoji: '👵' },
+  { word: 'nagypapa',  syllables: ['nagy','pa','pa'],     emoji: '👴' },
+  { word: 'tanterem',  syllables: ['tan','te','rem'],     emoji: '🏫' },
+  { word: 'mozdony',   syllables: ['moz','dony'],         emoji: '🚂' },
+  { word: 'mosógép',   syllables: ['mo','só','gép'],      emoji: '🫧' },
+  { word: 'kerékpár',  syllables: ['ke','rék','pár'],     emoji: '🚲' },
+  { word: 'számítógép',syllables: ['szá','mí','tó','gép'],emoji: '💻' },
+  { word: 'telefon',   syllables: ['te','le','fon'],      emoji: '📱' },
+  { word: 'napraforgó',syllables: ['nap','ra','for','gó'],emoji: '🌻' },
+  { word: 'Budapest',  syllables: ['Bu','da','pest'],     emoji: '🏙️' },
+  { word: 'kórház',    syllables: ['kór','ház'],          emoji: '🏥' },
+  { word: 'egészség',  syllables: ['e','gész','ség'],     emoji: '💪' },
+  { word: 'születésnap',syllables:['szü','le','tés','nap'],emoji:'🎂'},
+  { word: 'otthon',    syllables: ['ott','hon'],          emoji: '🏠' },
+  { word: 'ólom',      syllables: ['ó','lom'],            emoji: '⚖️' },
+  { word: 'ünnep',     syllables: ['ün','nep'],           emoji: '🎉' },
+  { word: 'reggeli',   syllables: ['reg','ge','li'],      emoji: '🍳' },
+  { word: 'ebéd',      syllables: ['e','béd'],            emoji: '🍽️' },
+  { word: 'vacsora',   syllables: ['va','cso','ra'],      emoji: '🌙' },
+  { word: 'futball',   syllables: ['fut','ball'],         emoji: '⚽' },
+  { word: 'kosárlabda',syllables: ['ko','sár','lab','da'],emoji: '🏀' },
+];
+
+// ===== STATE =====
+let players = [], selectedPlayerIdx = 0;
+let curMode = 'jly'; // 'jly' or 'szo'
+let tInt = null, timeLeft = 0;
+let rOk = 0, rAll = 0;
+let gameActive = false;
+let waiting = false;
+let mistakes = [];
+
+// JLY state
+let jlyQueue = [];       // words to ask (shuffled, weighted)
+let jlyErrors = {};      // { word: errCount }  — how many times wrong in total history
+let jlyHits   = {};      // { word: hitSinceLastError }
+let jlyCurrent = null;
+
+// SZO state
+let szoQueue = [];
+let szoCurrent = null;
+let szoActiveGaps = new Set();
+
+// ===== STORAGE =====
+function loadData(key) { try{ return JSON.parse(localStorage.getItem(key)||'null'); }catch(e){return null;} }
+function saveData(key,v) { try{ localStorage.setItem(key,JSON.stringify(v)); }catch(e){} }
+function loadPlayers() { return loadData('hPlayers'); }
+function savePlayers() { saveData('hPlayers', players); }
+function loadLB() { return loadData('hLB') || {}; }
+function saveLB(lb) { saveData('hLB', lb); }
+function loadErrors() { return loadData('hErrors') || {}; }
+function saveErrors() { saveData('hErrors', jlyErrors); }
+function loadHits() { return loadData('hHits') || {}; }
+function saveHits() { saveData('hHits', jlyHits); }
+
+// ===== SCREEN =====
+function showScr(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== WELCOME =====
+function initWelcome() {
+  const saved = loadPlayers();
+  players = (saved && saved.length) ? saved : [{name:'', avatar:'🦁'}];
+  if (selectedPlayerIdx >= players.length) selectedPlayerIdx = 0;
+  jlyErrors = loadErrors();
+  jlyHits   = loadHits();
+  renderPlayerCards();
+  selectMode(curMode);
+}
+
+function renderPlayerCards() {
+  const c = document.getElementById('player-cards');
+  c.innerHTML = '';
+  players.forEach((p, i) => {
+    const d = document.createElement('div');
+    d.className = 'player-card' + (i === selectedPlayerIdx ? ' selected' : '');
+    d.onclick = (e) => {
+      if (e.target.classList.contains('pc-del') || e.target.classList.contains('pc-avatar')) return;
+      selectedPlayerIdx = i; renderPlayerCards();
+    };
+    d.innerHTML =
+      `<span class="pc-avatar" onclick="cycleAv(${i},event)">${p.avatar}</span>` +
+      `<div class="pc-name-wrap">
+        <input class="pc-name-input" type="text" placeholder="Játékos neve..." value="${p.name}"
+          data-pidx="${i}" oninput="players[+this.dataset.pidx].name=this.value" maxlength="16"
+          onclick="event.stopPropagation()">
+        <span class="pc-hint">${i === selectedPlayerIdx ? '▶ Ez játszik most' : 'Kattints a kiválasztáshoz'}</span>
+      </div>` +
+      (players.length > 1 ? `<button class="pc-del" onclick="delPlayer(${i},event)">✕</button>` : '');
+    c.appendChild(d);
+  });
+  const sel = players[selectedPlayerIdx];
+  const nm = (sel && sel.name.trim()) ? sel.name.trim() : 'Játékos ' + (selectedPlayerIdx + 1);
+  document.getElementById('btn-start').textContent = `🚀 ${nm} játszik!`;
+}
+
+function addPlayerInput() {
+  players.push({name:'', avatar: AVATARS[players.length % AVATARS.length]});
+  savePlayers(); renderPlayerCards();
+}
+function cycleAv(i, e) {
+  e.stopPropagation();
+  const idx = AVATARS.indexOf(players[i].avatar);
+  players[i].avatar = AVATARS[(idx+1) % AVATARS.length];
+  savePlayers(); renderPlayerCards();
+}
+function delPlayer(i, e) {
+  e.stopPropagation();
+  players.splice(i,1);
+  if (selectedPlayerIdx >= players.length) selectedPlayerIdx = players.length - 1;
+  savePlayers(); renderPlayerCards();
+}
+function selectMode(m) {
+  curMode = m;
+  document.getElementById('mode-card-jly').className = 'mode-pick-card' + (m==='jly'?' sel-jly':'');
+  document.getElementById('mode-card-szo').className = 'mode-pick-card' + (m==='szo'?' sel-szo':'');
+}
+
+function startGame() {
+  document.querySelectorAll('.pc-name-input').forEach(inp => {
+    const idx = +inp.dataset.pidx;
+    if (players[idx]) players[idx].name = inp.value;
+  });
+  savePlayers();
+
+  const p = players[selectedPlayerIdx];
+  const nm = (p.name.trim()) ? p.name.trim() : 'Játékos ' + (selectedPlayerIdx+1);
+  document.getElementById('p-badge').innerHTML = p.avatar + ' <span id="p-name-top">' + nm + '</span>';
+
+  rOk = 0; rAll = 0; mistakes = [];
+  updateSc();
+  resetTimer();
+  gameActive = false;
+  waiting = false;
+
+  // Prepare queue
+  if (curMode === 'jly') buildJlyQueue();
+  else buildSzoQueue();
+
+  // Show ready card
+  document.getElementById('qcard').style.display = 'none';
+  document.getElementById('ready-card').style.display = '';
+  document.getElementById('ready-icon').textContent = curMode==='jly' ? '🔤' : '✂️';
+  document.getElementById('ready-title').textContent = curMode==='jly' ? 'J vagy LY?' : 'Szótagolás';
+  document.getElementById('ready-desc').textContent = curMode==='jly'
+    ? 'Kattints a helyes szóra! 1 perc az összes szó közül.'
+    : 'Jelöld meg a szótaghatárokat! Kattints a betűk között a vonalra.';
+  setFb('','');
+  showScr('screen-game');
+}
+
+function beginRound() {
+  document.getElementById('ready-card').style.display = 'none';
+  document.getElementById('qcard').style.display = '';
+  gameActive = true;
+  startTimer();
+  nextQ();
+}
+
+// ===== TIMER =====
+function startTimer() {
+  timeLeft = ROUND_TIME;
+  updateTimer();
+  tInt = setInterval(() => {
+    timeLeft--;
+    updateTimer();
+    if (timeLeft <= 0) { clearInterval(tInt); tInt=null; showRC(); }
+  }, 1000);
+}
+function resetTimer() {
+  if (tInt) { clearInterval(tInt); tInt=null; }
+  timeLeft = ROUND_TIME;
+  updateTimer();
+}
+function stopTimer() { if(tInt){clearInterval(tInt);tInt=null;} }
+function updateTimer() {
+  const pct = timeLeft/ROUND_TIME*100;
+  const fill = document.getElementById('timer-fill');
+  fill.style.width = pct + '%';
+  fill.style.background = timeLeft > 20 ? '#4ade80' : timeLeft > 10 ? '#fbbf24' : '#f87171';
+  fill.style.boxShadow = `0 0 8px ${timeLeft>20?'#4ade8088':timeLeft>10?'#fbbf2488':'#f8717188'}`;
+  const num = document.getElementById('timer-num');
+  num.textContent = timeLeft;
+  num.style.color = timeLeft > 20 ? '#4ade80' : timeLeft > 10 ? '#fbbf24' : '#f87171';
+}
+
+// ===== J/LY GAME =====
+function buildJlyQueue() {
+  // Priority: words with errors that haven't been mastered
+  // mastered = jlyHits[word] >= max(5, errCount*2)
+  let priority = [], normal = [];
+  JLY_WORDS.forEach(w => {
+    const err = jlyErrors[w.correct] || 0;
+    const hit = jlyHits[w.correct] || 0;
+    const needed = Math.max(5, err * 2);
+    if (err > 0 && hit < needed) priority.push(w);
+    else normal.push(w);
+  });
+  // Shuffle both, priority first
+  shuffle(priority); shuffle(normal);
+  jlyQueue = [...priority, ...priority, ...normal]; // priority words appear more
+  jlyQueue = jlyQueue.slice(0, 200); // limit
+}
+
+function nextQ() {
+  if (!gameActive) return;
+  if (curMode === 'jly') nextJly();
+  else nextSzo();
+}
+
+function nextJly() {
+  if (jlyQueue.length === 0) buildJlyQueue();
+  jlyCurrent = jlyQueue.shift();
+  renderJly();
+}
+
+function renderJly() {
+  const w = jlyCurrent;
+  // Build wrong version: replace j with ly or ly with j
+  // wrong is already stored in the data
+
+  const err = jlyErrors[w.correct] || 0;
+  const hit = jlyHits[w.correct]   || 0;
+  const needed = Math.max(5, err*2);
+  const progress = err > 0 ? Math.min(hit/needed, 1) : 1;
+
+  // Determine which answer is j and which is ly
+  const options = shuffle_copy([
+    { text: w.correct, isCorrect: true },
+    { text: w.wrong,   isCorrect: false }
+  ]);
+
+  document.getElementById('qbadge').className = 'q-badge badge-jly';
+  document.getElementById('qbadge').textContent = '🔤 J vagy LY?';
+
+  let progressHTML = '';
+  if (err > 0) {
+    const pct = Math.round(progress*100);
+    progressHTML = `
+      <div class="jly-progress-bar"><div class="jly-progress-fill" style="width:${pct}%"></div></div>
+      <div class="jly-progress-label">Tanulás: ${hit}/${needed} helyes válasz</div>`;
+  }
+
+  document.getElementById('game-content').innerHTML = `
+    <div style="font-size:3.2rem;margin-bottom:6px">${w.emoji}</div>
+    <div class="jly-word-display">${w.hint}</div>
+    <div class="jly-choices" id="jly-choices">
+      <button class="jly-btn" onclick="checkJly(this, ${options[0].isCorrect})">${options[0].text}</button>
+      <button class="jly-btn" onclick="checkJly(this, ${options[1].isCorrect})">${options[1].text}</button>
+    </div>
+    ${progressHTML}
+  `;
+}
+
+function checkJly(btn, isCorrect) {
+  if (waiting) return;
+  rAll++;
+  const buttons = document.querySelectorAll('.jly-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    rOk++;
+    jlyHits[jlyCurrent.correct] = (jlyHits[jlyCurrent.correct]||0) + 1;
+    saveHits();
+    setFb(rndMsg(), 'correct');
+    confetti(6);
+    waiting = true;
+    setTimeout(() => { waiting=false; setFb('',''); nextQ(); }, 800);
+  } else {
+    btn.classList.add('wrong');
+    // Show correct answer
+    buttons.forEach(b => { if (b.textContent === jlyCurrent.correct) b.classList.add('correct'); });
+    jlyErrors[jlyCurrent.correct] = (jlyErrors[jlyCurrent.correct]||0) + 1;
+    jlyHits[jlyCurrent.correct] = 0; // reset streak
+    saveErrors(); saveHits();
+    // Push back into queue for re-practice
+    jlyQueue.unshift(jlyCurrent);
+    if (!mistakes.find(m => m.q === jlyCurrent.wrong)) {
+      mistakes.push({ q: jlyCurrent.wrong, a: jlyCurrent.correct });
+    }
+    setFb(`❌ Helytelen! A helyes: ${jlyCurrent.correct}`, 'wrong');
+    waiting = true;
+    setTimeout(() => { waiting=false; setFb('',''); nextQ(); }, 1800);
+  }
+  updateSc();
+}
+
+// ===== SZÓTAGOLÁS GAME =====
+function buildSzoQueue() {
+  szoQueue = shuffle_copy(SZOTAG_WORDS);
+}
+
+function nextSzo() {
+  if (szoQueue.length === 0) buildSzoQueue();
+  szoCurrent = szoQueue.shift();
+  szoActiveGaps = new Set();
+  renderSzo();
+}
+
+function renderSzo() {
+  const w = szoCurrent;
+  document.getElementById('qbadge').className = 'q-badge badge-szo';
+  document.getElementById('qbadge').textContent = '✂️ Szótagolás';
+
+  // Build letter+gap UI
+  const letters = [...w.word]; // unicode-safe
+  let charsHTML = '';
+  for (let i = 0; i < letters.length; i++) {
+    charsHTML += `<span class="szo-letter">${letters[i]}</span>`;
+    if (i < letters.length - 1) {
+      charsHTML += `<span class="szo-gap" data-idx="${i}" onclick="toggleGap(${i})">
+        <div class="szo-gap-line" id="gap-${i}"></div>
+      </span>`;
+    }
+  }
+
+  document.getElementById('game-content').innerHTML = `
+    <div style="font-size:3rem;margin-bottom:4px">${w.emoji}</div>
+    <div class="szo-hint">Kattints a szótaghatárokra, majd nyomj <b>OK</b>-t!</div>
+    <div class="szo-chars" id="szo-chars">${charsHTML}</div>
+    <div class="szo-result-row">
+      <div class="szo-result" id="szo-result-text"><span class="szo-result-placeholder">— elválasztás —</span></div>
+    </div>
+    <button class="submit-btn" onclick="checkSzo()">OK ✓</button>
+  `;
+  updateSzoResult();
+}
+
+function toggleGap(idx) {
+  if (waiting) return;
+  if (szoActiveGaps.has(idx)) {
+    szoActiveGaps.delete(idx);
+    document.getElementById('gap-'+idx).parentElement.classList.remove('active');
+  } else {
+    szoActiveGaps.add(idx);
+    document.getElementById('gap-'+idx).parentElement.classList.add('active');
+  }
+  updateSzoResult();
+}
+
+function updateSzoResult() {
+  if (!szoCurrent) return;
+  const letters = [...szoCurrent.word];
+  if (szoActiveGaps.size === 0) {
+    document.getElementById('szo-result-text').innerHTML = '<span class="szo-result-placeholder">— elválasztás —</span>';
+    return;
+  }
+  let result = '';
+  for (let i = 0; i < letters.length; i++) {
+    result += letters[i];
+    if (i < letters.length - 1 && szoActiveGaps.has(i)) result += '-';
+  }
+  document.getElementById('szo-result-text').textContent = result;
+}
+
+function checkSzo() {
+  if (waiting) return;
+  const w = szoCurrent;
+  // Build correct gap positions from syllables
+  const letters = [...w.word];
+  const correctGaps = new Set();
+  let pos = 0;
+  for (let s = 0; s < w.syllables.length - 1; s++) {
+    pos += [...w.syllables[s]].length;
+    correctGaps.add(pos - 1); // gap after last char of syllable
+  }
+
+  rAll++;
+  const isCorrect = setsEqual(szoActiveGaps, correctGaps);
+
+  if (isCorrect) {
+    rOk++;
+    setFb(rndMsg(), 'correct');
+    confetti(6);
+    waiting = true;
+    // Animate correct letters green
+    document.querySelectorAll('.szo-gap.active .szo-gap-line').forEach(l => {
+      l.style.background = '#4ade80';
+    });
+    setTimeout(() => { waiting=false; setFb('',''); nextQ(); }, 900);
+  } else {
+    // Show correct
+    const correctStr = w.syllables.join('-');
+    if (!mistakes.find(m => m.q === w.word)) {
+      mistakes.push({ q: w.word, a: correctStr });
+    }
+    setFb(`❌ Helyes elválasztás: ${correctStr}`, 'wrong');
+    waiting = true;
+    // Show correct gaps in green
+    correctGaps.forEach(idx => {
+      const gap = document.querySelector(`.szo-gap[data-idx="${idx}"]`);
+      if (gap) {
+        gap.classList.add('active');
+        gap.querySelector('.szo-gap-line').style.background = '#4ade80';
+        gap.querySelector('.szo-gap-line').style.boxShadow = '0 0 8px #4ade8066';
+      }
+    });
+    // Show wrong gaps in red
+    szoActiveGaps.forEach(idx => {
+      if (!correctGaps.has(idx)) {
+        const gap = document.querySelector(`.szo-gap[data-idx="${idx}"]`);
+        if (gap) gap.querySelector('.szo-gap-line').style.background = '#f87171';
+      }
+    });
+    setTimeout(() => { waiting=false; setFb('',''); nextQ(); }, 2200);
+  }
+  updateSc();
+}
+
+function setsEqual(a, b) {
+  if (a.size !== b.size) return false;
+  for (const v of a) if (!b.has(v)) return false;
+  return true;
+}
+
+// ===== HELPERS =====
+function setFb(msg, cls) {
+  const el = document.getElementById('fb');
+  el.textContent = msg; el.className = 'feedback' + (cls?' '+cls:'');
+}
+function updateSc() {
+  document.getElementById('sc-ok').textContent = rOk;
+  document.getElementById('sc-all').textContent = rAll;
+}
+function rndMsg() {
+  const m = ['✅ Helyes! Szuper!','🌟 Brávó!','🎉 Fantasztikus!','⭐ Remek!','👏 Nagyszerű!','🚀 Szenzációs!','💪 Így tovább!','🔥 Tűzben vagy!','😍 Csodálatos!','🤩 Kiváló!'];
+  return m[Math.floor(Math.random()*m.length)];
+}
+function shuffle(arr) {
+  for (let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+function shuffle_copy(arr) { return shuffle([...arr]); }
+
+// ===== ROUND COMPLETE =====
+function showRC() {
+  stopTimer();
+  gameActive = false;
+  beep(440,300); setTimeout(()=>beep(550,300),320); setTimeout(()=>beep(660,450),640);
+
+  const p = players[selectedPlayerIdx];
+  const nm = p.name.trim() || 'Játékos '+(selectedPlayerIdx+1);
+  const pct = rAll > 0 ? Math.round(rOk/rAll*100) : 0;
+  saveToLB(nm, p.avatar, curMode, rOk, rAll, pct);
+
+  let tr='🏆', ti='Szupersztár!';
+  if(pct<40){tr='😊';ti='Szép próbálkozás!';}
+  else if(pct<60){tr='⭐';ti='Jól csináltad!';}
+  else if(pct<80){tr='🎉';ti='Nagyon jó!';}
+  else if(pct<100){tr='🔥';ti='Remek munka!';}
+
+  document.getElementById('rc-t').textContent = tr;
+  document.getElementById('rc-title').textContent = ti;
+  document.getElementById('rc-stats').innerHTML =
+    `<div class="stat"><div class="sv" style="color:var(--szo)">${rOk}</div><div class="sl">Helyes</div></div>` +
+    `<div class="stat"><div class="sv">${rAll}</div><div class="sl">Összesen</div></div>` +
+    `<div class="stat"><div class="sv" style="color:var(--jly)">${pct}%</div><div class="sl">Arány</div></div>`;
+
+  if (pct >= 70) confetti(45);
+
+  const md = document.getElementById('rc-mistakes');
+  md.innerHTML = '';
+  if (rAll > 0) {
+    if (mistakes.length === 0) {
+      md.innerHTML = '<div class="perfect-box">🎉 Hibátlan kör! Minden szót helyesen írtál!</div>';
+    } else {
+      md.innerHTML =
+        '<div class="mistakes-box">' +
+        `<div class="mistakes-hdr">❌ Hibás szavak (${mistakes.length}) – tanuld meg ezeket!</div>` +
+        mistakes.map(m =>
+          `<div class="mistake-row"><span class="mistake-q">${m.q}</span><span class="mistake-arr">→</span><span class="mistake-a">${m.a}</span></div>`
+        ).join('') +
+        '</div>';
+    }
+    md.style.display = 'block';
+  } else {
+    md.style.display = 'none';
+  }
+  document.getElementById('overlay').classList.add('show');
+}
+
+function playAgain() {
+  document.getElementById('overlay').classList.remove('show');
+  rOk=0; rAll=0; mistakes=[];
+  updateSc(); resetTimer();
+  gameActive = false; waiting = false;
+  if (curMode==='jly') buildJlyQueue(); else buildSzoQueue();
+  document.getElementById('qcard').style.display='none';
+  document.getElementById('ready-card').style.display='';
+  setFb('','');
+}
+
+function goWelcome() {
+  stopTimer(); gameActive=false;
+  document.getElementById('overlay').classList.remove('show');
+  showScr('screen-welcome');
+  initWelcome();
+}
+
+// ===== LEADERBOARD =====
+function saveToLB(name, avatar, mode, ok, all, pct) {
+  const lb = loadLB();
+  if (!lb[mode]) lb[mode] = [];
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('hu-HU',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  lb[mode].push({name,avatar,ok,all,pct,date:dateStr});
+  lb[mode].sort((a,b)=>b.ok!==a.ok?b.ok-a.ok:b.pct-a.pct);
+  lb[mode] = lb[mode].slice(0,20);
+  saveLB(lb);
+}
+
+function showRanglista() {
+  const lb = loadLB();
+  const modes = [{key:'jly',label:'J vagy LY?',icon:'🔤',color:'var(--jly)'},{key:'szo',label:'Szótagolás',icon:'✂️',color:'var(--szo)'}];
+  const medals = ['🥇','🥈','🥉'];
+  let html = '';
+  for (const m of modes) {
+    const entries = (lb[m.key]||[]).slice(0,3);
+    html += `<div style="background:var(--card);border:1.5px solid var(--border);border-radius:18px;overflow:hidden">`;
+    html += `<div style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--border);background:${m.color}18">
+      <span style="font-size:1.1rem">${m.icon}</span>
+      <span style="font-family:'Baloo 2',cursive;font-weight:800;font-size:1rem;color:${m.color}">${m.label}</span>
+    </div>`;
+    if (!entries.length) {
+      html += `<div style="padding:14px 16px;color:var(--muted);font-size:0.88rem;font-weight:700">Még nincs eredmény</div>`;
+    } else {
+      for (let i=0;i<entries.length;i++) {
+        const e=entries[i];
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:9px 14px;${i<entries.length-1?'border-bottom:1px solid var(--border)':''}${i===0?';background:'+m.color+'11':''}">
+          <span style="font-size:1.2rem;min-width:24px">${medals[i]}</span>
+          <span style="font-size:1.2rem">${e.avatar}</span>
+          <span style="flex:1;font-weight:800;font-size:0.95rem">${e.name}</span>
+          <div style="text-align:right">
+            <div style="font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:700;color:${m.color}">${e.ok}/${e.all} &nbsp; ${e.pct}%</div>
+            <div style="font-size:0.72rem;color:var(--muted)">${e.date}</div>
+          </div>
+        </div>`;
+      }
+    }
+    html += `</div>`;
+  }
+  document.getElementById('ranglista-content').innerHTML = html;
+  showScr('screen-ranglista');
+}
+
+// ===== CONFETTI =====
+function confetti(n) {
+  const box = document.getElementById('cf');
+  const cols = ['#fbbf24','#f87171','#4ade80','#60a5fa','#e879f9','#fb923c','#a78bfa'];
+  for (let i=0;i<n;i++) {
+    const el = document.createElement('div');
+    el.className = 'cp';
+    el.style.left = Math.random()*100+'vw';
+    el.style.background = cols[Math.floor(Math.random()*cols.length)];
+    const sz = 8+Math.random()*10;
+    el.style.width=sz+'px'; el.style.height=sz+'px';
+    el.style.borderRadius = Math.random()>.5?'50%':'3px';
+    const dur = 1.2+Math.random()*1.5;
+    el.style.animationDuration=dur+'s';
+    el.style.animationDelay=(Math.random()*0.5)+'s';
+    box.appendChild(el);
+    setTimeout(()=>el.remove(),(dur+1)*1000);
+  }
+}
+
+// ===== BEEP =====
+function beep(freq,dur){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.frequency.value=freq;o.type='sine';
+    g.gain.setValueAtTime(0.18,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur/1000);
+    o.start();o.stop(ctx.currentTime+dur/1000);
+  }catch(e){}
+}
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', e => {
+  if (e.key==='Enter') {
+    if (document.getElementById('screen-game').classList.contains('active') && curMode==='szo') checkSzo();
+  }
+  if (e.key==='1' || e.key==='ArrowLeft') {
+    if (document.getElementById('screen-game').classList.contains('active') && curMode==='jly' && gameActive) {
+      const btns = document.querySelectorAll('.jly-btn:not(:disabled)');
+      if (btns[0]) btns[0].click();
+    }
+  }
+  if (e.key==='2' || e.key==='ArrowRight') {
+    if (document.getElementById('screen-game').classList.contains('active') && curMode==='jly' && gameActive) {
+      const btns = document.querySelectorAll('.jly-btn:not(:disabled)');
+      if (btns[1]) btns[1].click();
+    }
+  }
+});
+
+// ===== INIT =====
+initWelcome();
+</script>
+</body>
+</html>
