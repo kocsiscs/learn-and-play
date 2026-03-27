@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📖 Szövegértés Varázs</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0e1a;
+  --bg2: #1a1830;
+  --card: #231f3a;
+  --card2: #2d2848;
+  --border: #3d3660;
+  --acc: #38bdf8;
+  --acc2: #818cf8;
+  --green: #4ade80;
+  --red: #f87171;
+  --yellow: #fbbf24;
+  --text: #f0eeff;
+  --muted: #9b8fc4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.screen { display: none; }
+.screen.active { display: flex; }
+
+/* ===== STARS ===== */
+.stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.star { position: absolute; border-radius: 50%; background: #fff; opacity: 0; animation: twinkle var(--d) ease-in-out var(--delay) infinite; }
+@keyframes twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.6); }
+  50% { opacity: var(--op); transform: scale(1.1); }
+}
+
+/* ===== WELCOME ===== */
+#screen-welcome {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+.logo {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(2.4rem, 8vw, 4rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, #38bdf8, #818cf8, #4ade80);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  filter: drop-shadow(0 0 28px #38bdf855);
+  line-height: 1.15;
+}
+.logo-sub { font-size: 1.05rem; color: var(--muted); font-weight: 700; text-align: center; }
+
+.story-selector {
+  width: 100%; max-width: 480px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.selector-label {
+  font-size: 0.92rem; color: var(--muted); font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  text-align: center;
+}
+.story-cards {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.story-card {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 16px; padding: 14px 18px;
+  cursor: pointer; transition: all 0.18s;
+  user-select: none;
+}
+.story-card:hover { border-color: #38bdf866; transform: translateY(-1px); }
+.story-card.selected {
+  border-color: var(--acc);
+  background: #38bdf811;
+  box-shadow: 0 4px 20px #38bdf844;
+}
+.sc-icon { font-size: 2rem; flex-shrink: 0; }
+.sc-info { flex: 1; }
+.sc-title { font-weight: 800; font-size: 1.05rem; }
+.sc-desc { font-size: 0.85rem; color: var(--muted); font-weight: 600; margin-top: 2px; }
+.sc-check {
+  font-size: 1.3rem; color: var(--acc); font-weight: 900;
+  opacity: 0; transition: opacity 0.15s;
+}
+.story-card.selected .sc-check { opacity: 1; }
+.sc-done {
+  display: none;
+  align-items: center; gap: 4px;
+  background: #4ade8022; border: 1.5px solid #4ade8066;
+  color: #4ade80; font-size: 0.78rem; font-weight: 800;
+  padding: 3px 9px; border-radius: 50px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.story-card.done .sc-done { display: flex; }
+
+.btn-start {
+  width: 100%; max-width: 480px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #fff; font-family: 'Nunito', sans-serif;
+  font-size: 1.2rem; font-weight: 900;
+  border: none; border-radius: 50px;
+  cursor: pointer; transition: filter 0.15s, transform 0.15s;
+  box-shadow: 0 4px 24px #38bdf855;
+  letter-spacing: 0.02em;
+}
+.btn-start:hover { filter: brightness(1.12); transform: scale(1.02); }
+.btn-start:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.back-link {
+  font-size: 0.9rem; color: var(--muted); font-weight: 700;
+  text-decoration: none; transition: color 0.15s;
+}
+.back-link:hover { color: var(--acc); }
+
+/* ===== READING SCREEN ===== */
+#screen-reading {
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 32px 20px 40px;
+  gap: 20px;
+  position: relative; z-index: 1;
+}
+.reading-header {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: 100%; max-width: 680px;
+}
+.reading-badge {
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #fff; font-size: 0.82rem; font-weight: 800;
+  padding: 4px 14px; border-radius: 50px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.reading-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
+  font-weight: 800; text-align: center;
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.reading-hint {
+  font-size: 0.88rem; color: var(--muted); font-weight: 700; text-align: center;
+}
+/* ===== GLOBAL TIMER BAR ===== */
+#global-timer {
+  display: none;
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg2);
+  border-bottom: 1.5px solid var(--border);
+  padding: 8px 20px;
+}
+.gtimer-row { display: flex; align-items: center; gap: 10px; max-width: 680px; margin: 0 auto; }
+.gtimer-icon { font-size: 0.9rem; }
+.gtimer-track {
+  flex: 1; height: 13px;
+  background: var(--card); border-radius: 50px;
+  overflow: hidden; border: 1px solid var(--border);
+}
+.gtimer-fill {
+  height: 100%; border-radius: 50px;
+  background: #4ade80;
+  transition: width 0.25s linear, background 0.5s;
+  box-shadow: 0 0 8px #4ade8088;
+}
+.gtimer-num {
+  font-family: 'Baloo 2', cursive; font-size: 1.25rem; font-weight: 700;
+  min-width: 46px; text-align: right; color: #4ade80;
+  transition: color 0.3s;
+}
+.story-box {
+  width: 100%; max-width: 680px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  padding: 32px 36px;
+  line-height: 1.9;
+  font-size: clamp(1rem, 2.5vw, 1.18rem);
+  font-weight: 600;
+  color: var(--text);
+  position: relative;
+}
+.story-icon {
+  font-size: 2.4rem;
+  margin-bottom: 16px;
+  display: block;
+  text-align: center;
+}
+.btn-hide {
+  width: 100%; max-width: 680px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #fff; font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem; font-weight: 900;
+  border: none; border-radius: 50px;
+  cursor: pointer; transition: filter 0.15s, transform 0.15s;
+  box-shadow: 0 4px 24px #38bdf855;
+}
+.btn-hide:hover { filter: brightness(1.12); transform: scale(1.02); }
+
+/* ===== QUIZ SCREEN ===== */
+#screen-quiz {
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 32px 20px 40px;
+  gap: 20px;
+  position: relative; z-index: 1;
+}
+.quiz-header {
+  width: 100%; max-width: 580px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.quiz-progress-row {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.quiz-progress-text {
+  font-size: 0.92rem; color: var(--muted); font-weight: 700;
+}
+.quiz-score-text {
+  font-size: 0.92rem; font-weight: 800;
+  color: var(--yellow);
+}
+.quiz-progress-bar-wrap {
+  width: 100%; height: 8px;
+  background: var(--card2); border-radius: 8px; overflow: hidden;
+}
+.quiz-progress-bar {
+  height: 100%; border-radius: 8px;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  transition: width 0.4s ease;
+}
+.question-card {
+  width: 100%; max-width: 580px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  padding: 28px 32px;
+}
+.question-num {
+  font-size: 0.82rem; color: var(--acc); font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.question-text {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1.1rem, 3vw, 1.4rem);
+  font-weight: 700; line-height: 1.4;
+  margin-bottom: 20px;
+}
+.answers-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 440px) {
+  .answers-grid { grid-template-columns: 1fr; }
+}
+.answer-btn {
+  padding: 14px 16px;
+  background: var(--card2);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.97rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+  text-align: left;
+  line-height: 1.3;
+}
+.answer-btn:hover:not(:disabled) {
+  border-color: var(--acc);
+  background: #38bdf811;
+  transform: translateY(-2px);
+}
+.answer-btn.correct {
+  border-color: var(--green);
+  background: #4ade8022;
+  color: var(--green);
+}
+.answer-btn.wrong {
+  border-color: var(--red);
+  background: #f8717122;
+  color: var(--red);
+}
+.answer-btn:disabled { cursor: default; transform: none; }
+
+.feedback-box {
+  width: 100%; max-width: 580px;
+  padding: 16px 24px;
+  border-radius: 16px;
+  font-size: 1rem; font-weight: 800;
+  text-align: center;
+  display: none;
+  animation: popIn 0.25s ease;
+}
+.feedback-box.show { display: block; }
+.feedback-box.correct {
+  background: #4ade8022;
+  border: 2px solid var(--green);
+  color: var(--green);
+}
+.feedback-box.wrong {
+  background: #f8717122;
+  border: 2px solid var(--red);
+  color: #fca5a5;
+}
+@keyframes popIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.btn-next {
+  width: 100%; max-width: 580px;
+  padding: 15px 32px;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #fff; font-family: 'Nunito', sans-serif;
+  font-size: 1.05rem; font-weight: 900;
+  border: none; border-radius: 50px;
+  cursor: pointer; transition: filter 0.15s, transform 0.15s;
+  box-shadow: 0 4px 24px #38bdf844;
+  display: none;
+}
+.btn-next.show { display: block; }
+.btn-next:hover { filter: brightness(1.12); transform: scale(1.02); }
+
+/* ===== RESULTS ===== */
+#screen-results {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  gap: 24px;
+  position: relative; z-index: 1;
+}
+.result-emoji {
+  font-size: 5rem; line-height: 1;
+  animation: bounceIn 0.5s ease;
+}
+@keyframes bounceIn {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.result-title {
+  font-family: 'Baloo 2', cursive;
+  font-size: clamp(1.8rem, 6vw, 3rem);
+  font-weight: 800; text-align: center;
+  background: linear-gradient(135deg, #38bdf8, #818cf8, #4ade80);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.result-score-box {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  padding: 28px 48px;
+  text-align: center;
+}
+.result-score-num {
+  font-family: 'Baloo 2', cursive;
+  font-size: 4.5rem; font-weight: 800; line-height: 1;
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.result-score-label {
+  font-size: 1rem; color: var(--muted); font-weight: 700; margin-top: 4px;
+}
+.result-stars {
+  font-size: 2.5rem; letter-spacing: 6px;
+}
+.result-msg {
+  font-size: 1.1rem; font-weight: 700; color: var(--muted);
+  text-align: center; max-width: 400px;
+}
+.result-answers {
+  width: 100%; max-width: 520px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.ra-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 14px; padding: 12px 16px;
+  font-size: 0.9rem;
+}
+.ra-item.ok { border-color: #4ade8055; }
+.ra-item.fail { border-color: #f8717155; }
+.ra-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+.ra-text { flex: 1; line-height: 1.4; }
+.ra-q { font-weight: 800; color: var(--text); }
+.ra-a { font-weight: 600; color: var(--muted); margin-top: 2px; }
+.ra-a.correct { color: var(--green); }
+.ra-a.wrong { color: var(--red); }
+
+.result-btns { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 360px; }
+.btn-retry {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #fff; font-family: 'Nunito', sans-serif;
+  font-size: 1.05rem; font-weight: 900;
+  border: none; border-radius: 50px;
+  cursor: pointer; transition: filter 0.15s, transform 0.15s;
+  box-shadow: 0 4px 24px #38bdf844;
+}
+.btn-retry:hover { filter: brightness(1.12); transform: scale(1.02); }
+.btn-home {
+  padding: 12px 32px;
+  background: var(--card); color: var(--muted);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.97rem; font-weight: 800;
+  border: 2px solid var(--border); border-radius: 50px;
+  cursor: pointer; transition: all 0.15s;
+  text-decoration: none; text-align: center;
+}
+.btn-home:hover { border-color: var(--acc); color: var(--acc); }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<!-- ===== GLOBAL TIMER ===== -->
+<div id="global-timer">
+  <div class="gtimer-row">
+    <span class="gtimer-icon">⏱</span>
+    <div class="gtimer-track"><div class="gtimer-fill" id="gtimerFill" style="width:100%"></div></div>
+    <div class="gtimer-num" id="gtimerNum">5:00</div>
+  </div>
+</div>
+
+<!-- ===== WELCOME ===== -->
+<div id="screen-welcome" class="screen active">
+  <div style="text-align:center; font-size:3.5rem; filter:drop-shadow(0 0 20px #38bdf855)">📖</div>
+  <div class="logo">Szövegértés<br>Varázs</div>
+  <div class="logo-sub">Olvasd el a szöveget, majd válaszolj a kérdésekre! 🧠</div>
+
+  <div class="story-selector">
+    <div class="selector-label">Válassz egy történetet</div>
+    <div class="story-cards" id="storyCards"></div>
+  </div>
+
+  <button class="btn-start" id="btnStart" disabled onclick="startGame()">Olvassuk el! →</button>
+  <a class="back-link" href="index.html">← Vissza a főmenübe</a>
+</div>
+
+<!-- ===== READING ===== -->
+<div id="screen-reading" class="screen">
+  <div class="reading-header">
+    <div class="reading-badge">📖 Olvasási idő</div>
+    <div class="reading-title" id="readingTitle"></div>
+    <div class="reading-hint">Olvasd el figyelmesen! A szöveg eltűnik, ha rákattintasz a gombra.</div>
+  </div>
+  <div class="story-box">
+    <span class="story-icon" id="storyIcon"></span>
+    <div id="storyText"></div>
+  </div>
+  <button class="btn-hide" onclick="hideStory()">Megvan! Jöhetnek a kérdések →</button>
+  <a class="back-link" href="#" onclick="goToWelcome(); return false;">← Másik történet</a>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <div class="quiz-progress-row">
+      <div class="quiz-progress-text" id="quizProgressText">1 / 5. kérdés</div>
+      <div class="quiz-score-text" id="quizScoreText">⭐ 0 pont</div>
+    </div>
+    <div class="quiz-progress-bar-wrap">
+      <div class="quiz-progress-bar" id="quizProgressBar" style="width:20%"></div>
+    </div>
+  </div>
+  <div class="question-card">
+    <div class="question-num" id="questionNum">1. kérdés</div>
+    <div class="question-text" id="questionText"></div>
+    <div class="answers-grid" id="answersGrid"></div>
+  </div>
+  <div class="feedback-box" id="feedbackBox"></div>
+  <button class="btn-next" id="btnNext" onclick="nextQuestion()">Következő kérdés →</button>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div id="screen-results" class="screen">
+  <div class="result-emoji" id="resultEmoji"></div>
+  <div class="result-title" id="resultTitle"></div>
+  <div class="result-score-box">
+    <div class="result-score-num" id="resultScoreNum"></div>
+    <div class="result-score-label">helyes válasz az 5-ből</div>
+    <div class="result-stars" id="resultStars"></div>
+  </div>
+  <div class="result-msg" id="resultMsg"></div>
+  <div class="result-answers" id="resultAnswers"></div>
+  <div class="result-btns">
+    <button class="btn-retry" onclick="goToWelcome()">Próbáljuk újra! →</button>
+    <a class="btn-home" href="index.html">← Főmenü</a>
+  </div>
+</div>
+
+<script>
+// ===== STORIES DATA =====
+const STORIES = [
+  {
+    id: 0,
+    icon: '🐰',
+    title: 'A kis nyuszi és a répa',
+    desc: 'Vidám mese az erdő mélyéről',
+    text: `Egyszer volt, hol nem volt, élt egy kis nyuszi az erdő szélén, akit Bodrinak hívtak. Bodrinak volt egy kis kertje, amelyben minden tavasszal csodálatos répákat nevelt. Egy reggel, amikor kiment a kertbe, nagy meglepetés érte: valaki megette az összes répáját! Bodri szomorú lett, és nyomokat keresett a földön. Hamarosan megtalálta a tolvajt: egy kicsi, éhes mókus bújt meg a bokor mögött. A mókus elpirult, és bocsánatot kért. Bodri nem haragudott, inkább meghívta a mókust teára és répakalácsra. Ettől kezdve jó barátok lettek, és minden évben együtt gondozták a kertet.`,
+    questions: [
+      {
+        q: 'Hogy hívták a kis nyuszit?',
+        answers: ['Bütyöknek', 'Bodrinak', 'Mancinak', 'Fülesnek'],
+        correct: 1
+      },
+      {
+        q: 'Mit nevelt Bodri a kertjében?',
+        answers: ['Almát', 'Káposztát', 'Répákat', 'Sárgarépát és borsót'],
+        correct: 2
+      },
+      {
+        q: 'Ki ette meg a répákat?',
+        answers: ['Egy farkas', 'Egy kicsi, éhes mókus', 'Egy nyúl', 'Egy sündisznó'],
+        correct: 1
+      },
+      {
+        q: 'Mit csinált Bodri a mókussal találkozásuk után?',
+        answers: ['Elfutott tőle', 'Megkergette a kertből', 'Meghívta teára és répakalácsra', 'Elmesélt a szüleinek'],
+        correct: 2
+      },
+      {
+        q: 'Mi lett a mókus és a nyuszi kapcsolatából?',
+        answers: ['Ellenségek lettek', 'Soha többé nem találkoztak', 'Jó barátok lettek', 'A mókus elköltözött'],
+        correct: 2
+      }
+    ]
+  },
+  {
+    id: 1,
+    icon: '🌧️',
+    title: 'Az eső napja',
+    desc: 'Egy esős szombat különleges kalandja',
+    text: `Ági szombat reggel arra ébredt, hogy nagy esőcseppek kopognak az ablakán. Nagyon szeretett volna kint játszani a barátaival, de az eső miatt ez nem sikerülhetett. Először szomorú volt, de aztán az anyukája egy nagy dobozt hozott elő a szekrényből. A dobozban régi lego darabok, filctollak és kartonpapír volt. Ági nekilátott, és egész nap egy hatalmas kastélyt épített legoból. Aztán kiszínezte, és papírból kis zászlókat hajtogatott rá. Amikor apukája hazaért, alig ismert rá a szobára – az egész olyan volt, mint egy igazi vár! Ági rájött, hogy egy esős nap is lehet csodálatos.`,
+    questions: [
+      {
+        q: 'Mire ébredt Ági szombat reggel?',
+        answers: ['A napsütésre', 'A madárcsicsergésre', 'Az esőcseppek kopogására', 'A szomszéd hangjára'],
+        correct: 2
+      },
+      {
+        q: 'Miért nem tudott Ági kint játszani?',
+        answers: ['Beteg volt', 'Az eső miatt', 'Nem volt kész a leckéje', 'Elveszett a labdája'],
+        correct: 1
+      },
+      {
+        q: 'Mi volt a dobozban, amit az anyukája előhozott?',
+        answers: ['Könyvek és puzzle', 'Lego, filctollak és kartonpapír', 'Társasjátékok', 'Ruhák és sapkák'],
+        correct: 1
+      },
+      {
+        q: 'Mit épített Ági egész nap?',
+        answers: ['Egy hidat', 'Egy autópályát', 'Egy hatalmas kastélyt', 'Egy házikót'],
+        correct: 2
+      },
+      {
+        q: 'Mit hajtogatott Ági papírból a kastélyra?',
+        answers: ['Kis zászlókat', 'Kis madarakat', 'Virágokat', 'Ablakokat'],
+        correct: 0
+      }
+    ]
+  },
+  {
+    id: 2,
+    icon: '🐠',
+    title: 'Bence és a hal',
+    desc: 'Egy különleges nap a tónál',
+    text: `Bence nagypapájával ment ki horgászni a tó mellé egy meleg júliusi reggelen. Nagypapa hozta a horgászbotokat, Bence pedig a szendvicseket rakta a táskába. Sokáig ültek csendben a parton, és figyelték a vizet. Bencének egyszerre csak megrándult a horgászbotja! Nagy izgalommal húzta ki a vízből, és egy szép, ezüstös halat fogott. Nagypapa elismerően bólintott, és elmagyarázta, hogy ez egy ponty. Bence annyira megszerette a kis halat, hogy nem akarta megtartani. Visszaengedte a vízbe, és integetett neki. Nagypapa mosolyogva bölcset mondott: a természetnek visszaadni legalább annyit ér, mint elvenni tőle.`,
+    questions: [
+      {
+        q: 'Kivel ment Bence horgászni?',
+        answers: ['Az apukájával', 'A nagypapájával', 'A barátjával', 'A bácsikájával'],
+        correct: 1
+      },
+      {
+        q: 'Mikor mentek horgászni?',
+        answers: ['Hideg téli délután', 'Esős őszi reggelen', 'Meleg júliusi reggelen', 'Hűvös tavaszi napon'],
+        correct: 2
+      },
+      {
+        q: 'Mit pakolt Bence a táskába?',
+        answers: ['A horgászbotokat', 'A szendvicseket', 'A hálót', 'A kukacokat'],
+        correct: 1
+      },
+      {
+        q: 'Milyen halat fogott Bence?',
+        answers: ['Egy csukát', 'Egy harcsát', 'Egy pontyot', 'Egy süllőt'],
+        correct: 2
+      },
+      {
+        q: 'Mit csinált Bence a hallal a végén?',
+        answers: ['Megtartotta és hazavitte', 'Megette', 'Visszaengedte a vízbe', 'Odaadta nagypapának'],
+        correct: 2
+      }
+    ]
+  },
+  {
+    id: 3,
+    icon: '🌻',
+    title: 'Lili napraforgója',
+    desc: 'A türelem és gondoskodás jutalma',
+    text: `Lili az óvodában kapott egy kis napraforgómagot, és elhatározta, hogy hazaviszi és elülteti. Anyukájával együtt ástak egy kis gödröt a kertben, beletették a magot, és jól megöntözték. Lili minden reggel kiszaladt a kertbe megnézni, hogy nőtt-e már a növény. Az első héten semmi sem történt, és Lili türelmetlenkedett. De a második héten megjelent egy piciny zöld szár a földből! Lili ujjongott örömében. Hetekig gondosan öntözte, és védte a csigáktól. Nyár végére a napraforgó olyan magas lett, mint Lili! A hatalmas sárga virágot az egész szomszédság megcsodálta, Lili pedig büszke volt, mert tudta: ő nevelte.`,
+    questions: [
+      {
+        q: 'Honnan kapta Lili a napraforgómagot?',
+        answers: ['A boltból', 'A nagymamájától', 'Az óvodában', 'A barátjától'],
+        correct: 2
+      },
+      {
+        q: 'Ki segített Lilinek elültetni a magot?',
+        answers: ['Apukája', 'Anyukája', 'A nagypapája', 'Egyedül ültette el'],
+        correct: 1
+      },
+      {
+        q: 'Mikor jelent meg az első kis szár a földből?',
+        answers: ['Az első héten', 'A harmadik héten', 'A második héten', 'Egy hónap múlva'],
+        correct: 2
+      },
+      {
+        q: 'Mitől védte Lili a növényt?',
+        answers: ['A rovároktól', 'A csigáktól', 'A hidegtől', 'A széltől'],
+        correct: 1
+      },
+      {
+        q: 'Mekkora lett a napraforgó nyár végére?',
+        answers: ['Olyan magas, mint az asztal', 'Olyan magas, mint Lili', 'Olyan magas, mint anyukája', 'Nagyon kicsi maradt'],
+        correct: 1
+      }
+    ]
+  },
+  {
+    id: 4,
+    icon: '🐶',
+    title: 'Morzsi és a labda',
+    desc: 'Egy kutya nagy kalandja a parkban',
+    text: `Morzsi egy vidám, bozontos kis kutya volt, aki imádott labdázni. Gazdája, Péter, minden szombaton elvitte a parkba játszani. Egy szép őszi délelőttön Péter nagyot dobott a piros labdával, de a labda begurult a bokrok közé. Morzsi utánarohant, és a labda kergetése közben egyre beljebb és beljebb ment az erdős részre. Hirtelen megállt: nem ismerte fel a helyet, és gazdája sem volt sehol. Morzsi elkezdett ugatni, majd leült egy fa tövébe, és várt. Péter nemsokára megtalálta, mert követte az ugatást. Morzsi boldogan ugrált rá, a labdát pedig mind a ketten megtalálták a bokor alatt.`,
+    questions: [
+      {
+        q: 'Mi volt Morzsi kedvenc tevékenysége?',
+        answers: ['Úszni a tóban', 'Labdázni', 'Aludni a kanapén', 'Csontot ásni'],
+        correct: 1
+      },
+      {
+        q: 'Mikor vitte Péter a parkba Morzsit?',
+        answers: ['Minden vasárnap', 'Minden szombaton', 'Minden pénteken', 'Minden reggel'],
+        correct: 1
+      },
+      {
+        q: 'Milyen színű volt a labda?',
+        answers: ['Kék', 'Sárga', 'Piros', 'Zöld'],
+        correct: 2
+      },
+      {
+        q: 'Hogyan találta meg Péter Morzsit?',
+        answers: ['GPS nyakörvvel', 'Követte az ugatást', 'Más kutyák segítségével', 'A parkőr megtalálta'],
+        correct: 1
+      },
+      {
+        q: 'Hol volt végül a labda?',
+        answers: ['A fán akadt meg', 'A tóba esett', 'A bokor alatt', 'Péternél volt'],
+        correct: 2
+      }
+    ]
+  },
+  {
+    id: 5,
+    icon: '🍰',
+    title: 'A születésnapi torta',
+    desc: 'Egy meglepetés, ami majdnem elromlott',
+    text: `Mama éppen hatvanéves lett, és az unokái titkos meglepetést terveztek neki. Zsófi és Bálint elhatározták, hogy egyedül megsütik a kedvenc csokitortáját. Zsófi elolvasta a receptet, Bálint pedig összegyűjtötte a hozzávalókat. Sajnos elfelejtették hozzáadni a cukrot, és csak akkor vették észre, amikor már a sütőben volt a tészta. Gyorsan kivették, belekeverték a cukrot, és visszatolták. A torta kicsit összeesett, de finom illata volt. Amikor Mama megkóstolta, a szemébe könny szökött. Azt mondta, ez a legfinomabb torta, amit valaha evett – nem azért, mert tökéletes volt, hanem mert szeretettel sütötték.`,
+    questions: [
+      {
+        q: 'Hány éves lett Mama?',
+        answers: ['Ötvenöt', 'Hatvan', 'Hatvanöt', 'Hetven'],
+        correct: 1
+      },
+      {
+        q: 'Mit tervezett Zsófi és Bálint Mamának?',
+        answers: ['Vásároltak egy tortát', 'Virágot hoztak', 'Megsütötték a kedvenc csokitortáját', 'Meglepetés bulit szerveztek'],
+        correct: 2
+      },
+      {
+        q: 'Mit felejtettek el beletenni a tésztába?',
+        answers: ['A lisztet', 'A cukrot', 'A tojást', 'A vajat'],
+        correct: 1
+      },
+      {
+        q: 'Mi lett a tortával, miután kivették és visszatolták?',
+        answers: ['Tökéletesen sikerült', 'Megégett', 'Kicsit összeesett', 'Egyáltalán nem sült meg'],
+        correct: 2
+      },
+      {
+        q: 'Miért mondta Mama, hogy ez a legfinomabb torta?',
+        answers: ['Mert csoki volt', 'Mert tökéletes volt', 'Mert szeretettel sütötték', 'Mert nagyon éhes volt'],
+        correct: 2
+      }
+    ]
+  },
+  {
+    id: 6,
+    icon: '⛄',
+    title: 'A hóember titka',
+    desc: 'Egy téli reggel varázslatos meglepetéssel',
+    text: `Téli szünetben Dóri és Máté nagy havazásra ébredtek. Az udvaron már derékig ért a hó, és rögtön kirohantak hóembert építeni. Gömbölyítötték a hógolyókat, és hamarosan elkészült a hóember: sárgarépa orral, szén szemekkel és apukájuk régi kalapjával. Másnap reggel Dóri észrevett valami furcsát: a hóember sálja más oldalon volt, mint előző nap! Máté elmagyarázta, hogy biztos a szél fordította meg. De Dóri titkos jegyzetfüzetébe felírta: „A hóember éjjel megmozdult." Évek múlva is emlegette ezt a téli reggelt, és sosem tudta meg biztosan, mi történt valójában.`,
+    questions: [
+      {
+        q: 'Mikor játszódik a történet?',
+        answers: ['Nyári szünetben', 'Őszi szünetben', 'Téli szünetben', 'Tavaszi hétvégén'],
+        correct: 2
+      },
+      {
+        q: 'Mi volt a hóember orra?',
+        answers: ['Egy gomb', 'Egy sárgarépa', 'Egy fadarab', 'Egy kavics'],
+        correct: 1
+      },
+      {
+        q: 'Kinek a kalapját tették a hóemberre?',
+        answers: ['Anyukájukét', 'Apukájukét', 'A szomszédét', 'Dóriét'],
+        correct: 1
+      },
+      {
+        q: 'Mit vett észre Dóri másnap reggel?',
+        answers: ['A hóember orra leesett', 'A hóember sálja más oldalon volt', 'A hóember elolvadt', 'A hóember kalapja eltűnt'],
+        correct: 1
+      },
+      {
+        q: 'Hogyan magyarázta Máté a változást?',
+        answers: ['Valaki megérintette éjjel', 'Biztos a szél fordította meg', 'A hóember valóban megmozdult', 'Nem tudta megmagyarázni'],
+        correct: 1
+      }
+    ]
+  },
+  {
+    id: 7,
+    icon: '🚂',
+    title: 'Az első vonatút',
+    desc: 'Nóra nagy utazása a nagymamához',
+    text: `Nóra hatéves korában utazott először egyedül vonaton. Anyukája feltette a vonatra, és megkérte a kalauz nénit, hogy vigyázzon rá. Nóra izgatottan ült az ablak mellé, és figyelte, ahogy az állomás lassan eltűnik mögöttük. A vonat először lassan indult, aztán egyre gyorsabb lett. Nóra az ablakból fákat, mezőket és kis falvakat látott elszaladni. Félúton a kalauz néni hozott neki egy pohár vizet és egy mosolyt. Amikor megérkezett a nagymamához, az már várta a peronon egy nagy öleléssel. Nóra büszke volt magára, és rögtön el is mesélte az egész utazást, minden részletet.`,
+    questions: [
+      {
+        q: 'Hány éves volt Nóra az első vonatútján?',
+        answers: ['Öt éves', 'Hatéves', 'Hét éves', 'Nyolc éves'],
+        correct: 1
+      },
+      {
+        q: 'Ki kérte meg a kalauz nénit, hogy vigyázzon Nórára?',
+        answers: ['Apukája', 'Anyukája', 'Nagymamája', 'A vonatállomás dolgozója'],
+        correct: 1
+      },
+      {
+        q: 'Hova ült Nóra a vonaton?',
+        answers: ['A folyosóra', 'A kupé közepére', 'Az ablak mellé', 'A kalauz mellé'],
+        correct: 2
+      },
+      {
+        q: 'Mit látott Nóra az ablakból?',
+        answers: ['Tengerpartot és hegyeket', 'Fákat, mezőket és kis falvakat', 'Városokat és hidakat', 'Csak felhőket'],
+        correct: 1
+      },
+      {
+        q: 'Ki várta Nórát a peronon?',
+        answers: ['Apukája', 'A kalauz néni', 'A nagymamája', 'A barátja'],
+        correct: 2
+      }
+    ]
+  },
+  {
+    id: 8,
+    icon: '🦋',
+    title: 'A pillangó és a hernyó',
+    desc: 'Egy csodálatos átváltozás titka',
+    text: `Egy nyári délelőttön Tamás talált a kertben egy zöld hernyót, aki lassan mászkált egy levélen. Nagymamájának megmutatta, aki elmagyarázta, hogy a hernyó idővel bábba bújik, és pillangóvá változik. Tamás nem hitt neki, de visszatért másnap: a hernyó eltűnt, helyette egy barna báb lógott az ágon. Minden nap kiment megnézni. Tizennégy nappal később, reggel, a báb kinyílt – és egy gyönyörű narancssárga pillangó repült ki belőle. Tamás állva bámulta, ahogy a pillangó lassan próbálgatja szárnyait, majd felszáll az égre. Soha nem felejtette el azt a reggelt, és ettől kezdve nagyon szerette a természetet.`,
+    questions: [
+      {
+        q: 'Mit talált Tamás a kertben?',
+        answers: ['Egy kis madarat', 'Egy zöld hernyót', 'Egy színes pillangót', 'Egy bogárt'],
+        correct: 1
+      },
+      {
+        q: 'Ki magyarázta el Tamásnak az átváltozást?',
+        answers: ['Apukája', 'A tanárnéni', 'Nagymamája', 'A könyv'],
+        correct: 2
+      },
+      {
+        q: 'Milyen színű volt a báb?',
+        answers: ['Zöld', 'Fekete', 'Barna', 'Fehér'],
+        correct: 2
+      },
+      {
+        q: 'Hány nappal később kelt ki a pillangó?',
+        answers: ['Hét nap múlva', 'Tizennégy nappal később', 'Három hét múlva', 'Egy hónap múlva'],
+        correct: 1
+      },
+      {
+        q: 'Milyen színű volt a pillangó?',
+        answers: ['Kék', 'Lila', 'Narancssárga', 'Fehér'],
+        correct: 2
+      }
+    ]
+  },
+  {
+    id: 9,
+    icon: '🎨',
+    title: 'Réka és a festés',
+    desc: 'Amikor a hiba remekművé változik',
+    text: `Réka nagyon szeretett festeni, de sosem volt elégedett a képeivel. Egyik délután leült, és egy házat akart festeni, de a kezéből kiesett az ecset, és egy nagy kék folt keletkezett a papíron. Réka dühös lett, és majdnem összegyűrte a lapot. De aztán megállt, és nézte a foltot. Azt mondta magának: „Ez lehet egy tó." Elkezdett dolgozni tovább: zöld fákat festett a tó köré, egy kis hidat, és fehér hattyúkat a vízre. Amikor elkészült, mindenki azt kérdezte, hogy tervezte-e előre. Réka mosolyogva azt felelte: „Igen, persze." Attól a naptól kezdve nem félt a hibáktól – tudta, hogy néha a hibákból lesz a legjobb.`,
+    questions: [
+      {
+        q: 'Mit akart festeni Réka először?',
+        answers: ['Egy tavat', 'Egy házat', 'Egy erdőt', 'Hattyúkat'],
+        correct: 1
+      },
+      {
+        q: 'Hogyan keletkezett a kék folt a papíron?',
+        answers: ['Szándékosan festette', 'Leöntötte a festéket', 'Kiesett a kezéből az ecset', 'Valaki más csinálta'],
+        correct: 2
+      },
+      {
+        q: 'Mivé változtatta Réka a kék foltot?',
+        answers: ['Éggé', 'Tóvá', 'Heggyé', 'Virágoskertté'],
+        correct: 1
+      },
+      {
+        q: 'Mit festett Réka a tó köré?',
+        answers: ['Virágokat és házakat', 'Fákat, hidat és hattyúkat', 'Hegyeket és felhőket', 'Gyerekeket és kutyákat'],
+        correct: 1
+      },
+      {
+        q: 'Mit tanult Réka a festésből?',
+        answers: ['Hogy ne fesson többet', 'Hogy mindig tervezzen előre', 'Hogy a hibákból lehet valami szép', 'Hogy kék festéket ne használjon'],
+        correct: 2
+      }
+    ]
+  }
+];
+
+// ===== PERSISTENCE =====
+const DONE_KEY = 'zente_szovegertes_done';
+function loadDone() {
+  try { return new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]')); }
+  catch(e) { return new Set(); }
+}
+function markDone(storyId) {
+  const done = loadDone();
+  done.add(storyId);
+  localStorage.setItem(DONE_KEY, JSON.stringify([...done]));
+}
+
+// ===== STATE =====
+let selectedStory = null;
+let currentQ = 0;
+let score = 0;
+let userAnswers = [];
+let timerInterval = null;
+const TOTAL_TIME = 300; // 5 perc
+let timeLeft = TOTAL_TIME;
+
+// ===== AUDIO =====
+function beep(freq, ms) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = freq; o.type = 'sine';
+    g.gain.setValueAtTime(0.28, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + ms / 1000);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime + ms / 1000);
+  } catch(e) {}
+}
+function beepEnd() {
+  beep(440, 350);
+  setTimeout(() => beep(550, 350), 370);
+  setTimeout(() => beep(660, 500), 740);
+}
+
+// ===== INIT =====
+function init() {
+  renderStoryCards();
+  generateStars();
+}
+
+function generateStars() {
+  const el = document.getElementById('stars');
+  for (let i = 0; i < 55; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 1;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --d:${(Math.random()*4+2).toFixed(1)}s;
+      --delay:${(Math.random()*5).toFixed(1)}s;
+      --op:${(Math.random()*0.5+0.2).toFixed(2)};
+    `;
+    el.appendChild(s);
+  }
+}
+
+function renderStoryCards() {
+  const container = document.getElementById('storyCards');
+  const done = loadDone();
+  container.innerHTML = '';
+  STORIES.forEach(story => {
+    const isDone = done.has(story.id);
+    const div = document.createElement('div');
+    div.className = 'story-card'
+      + (selectedStory === story.id ? ' selected' : '')
+      + (isDone ? ' done' : '');
+    div.onclick = () => selectStory(story.id);
+    div.innerHTML = `
+      <div class="sc-icon">${story.icon}</div>
+      <div class="sc-info">
+        <div class="sc-title">${story.title}</div>
+        <div class="sc-desc">${story.desc}</div>
+      </div>
+      <div class="sc-done">✓ Teljesített</div>
+      <div class="sc-check">✓</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function selectStory(id) {
+  selectedStory = id;
+  renderStoryCards();
+  document.getElementById('btnStart').disabled = false;
+}
+
+// ===== SCREENS =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goToWelcome() {
+  clearInterval(timerInterval);
+  document.getElementById('global-timer').style.display = 'none';
+  showScreen('screen-welcome');
+}
+
+// ===== GLOBAL TIMER =====
+function startGlobalTimer() {
+  timeLeft = TOTAL_TIME;
+  updateTimerDisplay();
+  document.getElementById('global-timer').style.display = 'block';
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if ([60, 30, 10, 5, 3, 2, 1].includes(timeLeft)) {
+      beep(timeLeft <= 10 ? 880 : 660, timeLeft <= 5 ? 150 : 120);
+    }
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      beepEnd();
+      showResults();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const fill = document.getElementById('gtimerFill');
+  const num = document.getElementById('gtimerNum');
+  const pct = (timeLeft / TOTAL_TIME) * 100;
+  const mins = Math.floor(timeLeft / 60);
+  const secs = timeLeft % 60;
+  num.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+  fill.style.width = pct + '%';
+  let col = timeLeft > 120 ? '#4ade80' : timeLeft > 60 ? '#fbbf24' : '#f87171';
+  fill.style.background = col;
+  fill.style.boxShadow = `0 0 10px ${col}88`;
+  num.style.color = col;
+}
+
+// ===== GAME FLOW =====
+function startGame() {
+  if (selectedStory === null) return;
+  const story = STORIES[selectedStory];
+  currentQ = 0;
+  score = 0;
+  userAnswers = [];
+
+  // Setup reading screen
+  document.getElementById('readingTitle').textContent = story.title;
+  document.getElementById('storyIcon').textContent = story.icon;
+  document.getElementById('storyText').textContent = story.text;
+
+  startGlobalTimer();
+  showScreen('screen-reading');
+}
+
+function hideStory() {
+  showQuestion();
+  showScreen('screen-quiz');
+}
+
+// ===== QUIZ =====
+function showQuestion() {
+  const story = STORIES[selectedStory];
+  const q = story.questions[currentQ];
+  const total = story.questions.length;
+
+  document.getElementById('quizProgressText').textContent = `${currentQ + 1} / ${total}. kérdés`;
+  document.getElementById('quizScoreText').textContent = `⭐ ${score} pont`;
+  document.getElementById('quizProgressBar').style.width = `${((currentQ) / total) * 100}%`;
+  document.getElementById('questionNum').textContent = `${currentQ + 1}. kérdés`;
+  document.getElementById('questionText').textContent = q.q;
+
+  const grid = document.getElementById('answersGrid');
+  grid.innerHTML = '';
+  q.answers.forEach((ans, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = ans;
+    btn.onclick = () => selectAnswer(i);
+    grid.appendChild(btn);
+  });
+
+  document.getElementById('feedbackBox').className = 'feedback-box';
+  document.getElementById('feedbackBox').textContent = '';
+  const btnNext = document.getElementById('btnNext');
+  btnNext.className = 'btn-next';
+  btnNext.textContent = currentQ < story.questions.length - 1
+    ? 'Következő kérdés →'
+    : 'Eredmények megtekintése →';
+}
+
+function selectAnswer(idx) {
+  const story = STORIES[selectedStory];
+  const q = story.questions[currentQ];
+  const correct = q.correct;
+
+  const btns = document.querySelectorAll('.answer-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const isCorrect = idx === correct;
+  btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) btns[correct].classList.add('correct');
+
+  userAnswers.push({ qIdx: currentQ, chosen: idx, correct: correct, ok: isCorrect });
+  if (isCorrect) score++;
+
+  const fb = document.getElementById('feedbackBox');
+  if (isCorrect) {
+    fb.textContent = '✅ Helyes! Nagyszerű válasz!';
+    fb.className = 'feedback-box correct show';
+  } else {
+    fb.textContent = `❌ Nem egészen… A helyes válasz: „${q.answers[correct]}"`;
+    fb.className = 'feedback-box wrong show';
+  }
+
+  document.getElementById('btnNext').className = 'btn-next show';
+}
+
+function nextQuestion() {
+  const story = STORIES[selectedStory];
+  currentQ++;
+  if (currentQ >= story.questions.length) {
+    showResults();
+  } else {
+    showQuestion();
+  }
+}
+
+// ===== RESULTS =====
+function showResults() {
+  clearInterval(timerInterval);
+  document.getElementById('global-timer').style.display = 'none';
+  const story = STORIES[selectedStory];
+  const total = story.questions.length;
+  if (score >= 4) markDone(story.id);
+
+  document.getElementById('resultScoreNum').textContent = `${score} / ${total}`;
+
+  let emoji, title, msg, stars;
+  if (score === 5) {
+    emoji = '🏆'; title = 'Fantasztikus!'; stars = '⭐⭐⭐⭐⭐';
+    msg = 'Minden kérdésre helyesen válaszoltál. Igazi olvasási bajnok vagy!';
+  } else if (score === 4) {
+    emoji = '🌟'; title = 'Szuper teljesítmény!'; stars = '⭐⭐⭐⭐';
+    msg = 'Majdnem tökéletes! Egy kicsi figyelmet és tökéletes lesz.';
+  } else if (score === 3) {
+    emoji = '😊'; title = 'Jól csináltad!'; stars = '⭐⭐⭐';
+    msg = 'Szép munka! Még egy olvasással biztosan jobban megy majd.';
+  } else if (score === 2) {
+    emoji = '🤔'; title = 'Próbáljuk újra!'; stars = '⭐⭐';
+    msg = 'Érdemes még egyszer elolvasni a szöveget. Tudod te ezt jobban is!';
+  } else {
+    emoji = '💪'; title = 'Nem adjuk fel!'; stars = '⭐';
+    msg = 'Olvasd el még egyszer lassan, és biztosan jobban fog menni!';
+  }
+
+  const timeUp = timeLeft <= 0;
+  if (timeUp && score < 5) {
+    msg = '⏰ Lejárt az idő! ' + msg;
+  }
+
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultStars').textContent = stars;
+  document.getElementById('resultMsg').textContent = msg;
+
+  // Answer breakdown
+  const container = document.getElementById('resultAnswers');
+  container.innerHTML = '';
+  userAnswers.forEach((ua, i) => {
+    const q = story.questions[ua.qIdx];
+    const div = document.createElement('div');
+    div.className = 'ra-item ' + (ua.ok ? 'ok' : 'fail');
+    div.innerHTML = `
+      <div class="ra-icon">${ua.ok ? '✅' : '❌'}</div>
+      <div class="ra-text">
+        <div class="ra-q">${i + 1}. ${q.q}</div>
+        ${ua.ok
+          ? `<div class="ra-a correct">✓ ${q.answers[ua.correct]}</div>`
+          : `<div class="ra-a wrong">Te: ${q.answers[ua.chosen]}</div>
+             <div class="ra-a correct">Helyes: ${q.answers[ua.correct]}</div>`
+        }
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  showScreen('screen-results');
+}
+
+init();
+</script>
+</body>
+</html>

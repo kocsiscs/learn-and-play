@@ -91,7 +91,7 @@ header {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
   width: 100%;
-  max-width: 680px;
+  max-width: 960px;
   position: relative;
   z-index: 1;
 }
@@ -147,6 +147,15 @@ header {
   box-shadow: 0 16px 48px #fbbf2430;
 }
 
+.game-card.szovegertes::before {
+  background: radial-gradient(ellipse at 50% 0%, #38bdf820 0%, transparent 70%);
+}
+
+.game-card.szovegertes:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 16px 48px #38bdf830;
+}
+
 .game-card:active {
   transform: translateY(-2px) scale(0.99);
 }
@@ -181,6 +190,23 @@ header {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.game-card.szovegertes .card-title {
+  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.game-card.szovegertes .card-icon {
+  filter: drop-shadow(0 0 16px #38bdf888);
+}
+
+.game-card.szovegertes .card-btn {
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #fff;
+  box-shadow: 0 4px 18px #38bdf855;
 }
 
 .card-desc {
@@ -277,6 +303,13 @@ footer {
     <div class="card-icon">🌟🔢</div>
     <div class="card-title">Matek Varázs</div>
     <div class="card-desc">Összeadás, kivonás, szorzás, osztás – fejleszd a számolási készségedet játékosan!</div>
+    <button class="card-btn">Játék indítása →</button>
+  </a>
+
+  <a class="game-card szovegertes" href="szovegertes_varazs.html">
+    <div class="card-icon">📖🧠</div>
+    <div class="card-title">Szövegértés Varázs</div>
+    <div class="card-desc">Olvasd el a történetet, majd válaszolj a kérdésekre! Fejleszd a szövegértési készségedet!</div>
     <button class="card-btn">Játék indítása →</button>
   </a>
 </div>
